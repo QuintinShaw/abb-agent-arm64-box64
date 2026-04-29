@@ -60,6 +60,17 @@ sudo abb-cli -s
 
 服务不会自动启用。
 
+仓库也包含 VM 侧验证脚本：
+
+```bash
+./scripts/verify-rpm-vm.sh
+./scripts/verify-rpm-vm.sh --install --rpm dist/abb-agent-arm64-box64-3.2.0-5053.aarch64.rpm
+./scripts/verify-rpm-vm.sh --start-service
+./scripts/verify-rpm-vm.sh --uninstall
+```
+
+默认模式只读。安装和卸载模式必须显式指定，因为它们会改变系统包、DKMS 状态和 systemd 状态。该验证脚本不会注册 NAS、创建任务或执行备份/恢复测试。
+
 ## SELinux
 
 SELinux enforcing 时，在服务启动、NAS 注册、备份和恢复期间收集 denial：

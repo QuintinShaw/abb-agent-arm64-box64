@@ -71,6 +71,19 @@ sudo abb-cli -s
 
 The service is not enabled automatically.
 
+The repository also includes a VM-side verifier:
+
+```bash
+./scripts/verify-rpm-vm.sh
+./scripts/verify-rpm-vm.sh --install --rpm dist/abb-agent-arm64-box64-3.2.0-5053.aarch64.rpm
+./scripts/verify-rpm-vm.sh --start-service
+./scripts/verify-rpm-vm.sh --uninstall
+```
+
+Default mode is read-only. Install and uninstall modes are explicit because
+they change system packages, DKMS state, and systemd state. The verifier does
+not register to NAS, create tasks, or run backup/restore tests.
+
 ## SELinux
 
 When SELinux is enforcing, collect denials during service start, NAS

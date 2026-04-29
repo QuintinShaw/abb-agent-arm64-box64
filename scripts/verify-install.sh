@@ -34,3 +34,6 @@ else
     echo "abb-cli wrapper not found"
 fi
 
+echo
+echo "Note:"
+echo "  For RPM VM install validation, use scripts/verify-rpm-vm.sh."

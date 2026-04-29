@@ -37,6 +37,19 @@ sudo systemctl status abb-box64.service --no-pager
 sudo abb-cli -s
 ```
 
+Or run the packaged verifier:
+
+```bash
+./scripts/verify-rpm-vm.sh
+./scripts/verify-rpm-vm.sh --install --rpm dist/abb-agent-arm64-box64-3.2.0-5053.aarch64.rpm
+./scripts/verify-rpm-vm.sh --start-service
+```
+
+The first command is read-only. The install command verifies rpm metadata,
+installs the package through `dnf` or `yum`, checks DKMS state, checks the
+kernel module, prints systemd state, and collects recent journal and SELinux
+denials. It does not register the host to NAS and does not start backups.
+
 ## SELinux Check
 
 ```bash
@@ -46,3 +59,14 @@ sudo journalctl -u abb-box64.service -n 200 --no-pager
 ```
 
 Keep SELinux enforcing results separate from permissive-mode results.
+
+## Uninstall Check
+
+After service and DKMS checks, validate package removal in the disposable VM:
+
+```bash
+./scripts/verify-rpm-vm.sh --uninstall
+```
+
+Do not use uninstall output as proof that NAS-side tasks or backup data were
+removed. Those are outside the local RPM package scope.
