@@ -16,14 +16,23 @@ Run the build with a mounted workspace:
 ```bash
 podman run --rm \
   -v "$PWD:/work:Z" \
-  -w /work \
-  abb-rpm-build \
-  ./scripts/build-rpm.sh
+  abb-rpm-build
+```
+
+For Docker on systems without SELinux relabeling:
+
+```bash
+docker run --rm \
+  -v "$PWD:/work" \
+  abb-rpm-build
 ```
 
 This container is Debian-based on purpose: it provides `rpmbuild`,
 `rpm2cpio`, and `x86_64-linux-gnu-gcc` without installing RPM tooling on the
-host. It is only an assembly check and should not be used as release evidence.
+host. The entrypoint copies the mounted checkout to a temporary container
+directory, runs `scripts/build-rpm.sh` as the unprivileged `builder` user, and
+copies only `dist/` back to the mounted workspace. It is only an assembly check
+and should not be used as release evidence.
 
 Install and run the generated rpm only inside a disposable ARM64 RPM VM or test
 host:

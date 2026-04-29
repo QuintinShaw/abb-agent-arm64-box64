@@ -6,6 +6,12 @@ License:        MIT AND LicenseRef-Synology-Proprietary
 URL:            https://github.com/QuintinShaw/abb-agent-arm64-box64
 BuildArch:      aarch64
 Source0:        %{name}-%{version}-@RELEASE@-payload.tar.gz
+AutoReqProv:    no
+
+%global __strip /bin/true
+%global __brp_strip /bin/true
+%global __brp_strip_comment_note /bin/true
+%global __brp_strip_static_archive /bin/true
 
 Requires:       dkms
 Requires:       gcc
@@ -89,11 +95,7 @@ if [ "$1" = "0" ]; then
 fi
 
 %files
-%license usr/share/doc/%{name}/LICENSE
-%doc usr/share/doc/%{name}/README.md
-%doc usr/share/doc/%{name}/README.zh-CN.md
-%doc usr/share/doc/%{name}/NOTICE
-%doc usr/share/doc/%{name}/SECURITY.md
+/usr/share/doc/%{name}
 /opt/Synology/ActiveBackupforBusiness
 /usr/src/synosnap-@SYNOSNAP_VERSION@
 /usr/lib/synosnap/libsynosnap.so

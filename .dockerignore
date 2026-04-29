@@ -1,0 +1,15 @@
+.git
+.codex
+build/
+cache/
+dist/
+*.deb
+*.rpm
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.img
+*.so
+*.o
+*.a

@@ -45,10 +45,10 @@ dist/abb-agent-arm64-box64-3.2.0-5053.aarch64.rpm
 
 ```bash
 podman build -f docker/Containerfile.rpm-build -t abb-rpm-build .
-podman run --rm -v "$PWD:/work:Z" -w /work abb-rpm-build ./scripts/build-rpm.sh
+podman run --rm -v "$PWD:/work:Z" abb-rpm-build
 ```
 
-这不会验证 DKMS、systemd、SELinux、NAS 注册、备份或恢复行为。
+容器会把挂载的源码复制到临时目录，以非 root 用户执行 RPM 构建，并只把 `dist/` 复制回挂载工作区。这不会验证 DKMS、systemd、SELinux、NAS 注册、备份或恢复行为。
 
 ## 在一次性 VM 中安装
 

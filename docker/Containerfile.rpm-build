@@ -2,8 +2,11 @@ FROM debian:12-slim
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
+      binutils \
       cpio \
+      file \
       gcc-x86-64-linux-gnu \
+      libc6-dev-amd64-cross \
       make \
       rpm \
       sed \
@@ -12,6 +15,12 @@ RUN apt-get update \
       wget \
     && rm -rf /var/lib/apt/lists/*
 
+RUN useradd --create-home --shell /bin/bash builder
+
+COPY docker/rpm-build-entrypoint.sh /usr/local/bin/rpm-build-entrypoint
+RUN chmod 0755 /usr/local/bin/rpm-build-entrypoint
+
 WORKDIR /work
 
+ENTRYPOINT ["rpm-build-entrypoint"]
 CMD ["./scripts/build-rpm.sh"]

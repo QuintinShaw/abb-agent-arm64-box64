@@ -11,6 +11,7 @@ Use containers for:
 - verifying scripts parse and extract official packages.
 - checking rpm/deb package metadata.
 - running shell syntax checks.
+- running package assembly as an unprivileged user inside an isolated container.
 
 Use disposable VMs or spare physical hosts for:
 
@@ -22,4 +23,7 @@ Use disposable VMs or spare physical hosts for:
 
 See [Containerfile.rpm-build](Containerfile.rpm-build) and
 [../examples/container-rpm-build.md](../examples/container-rpm-build.md) for a
-container-only RPM assembly check.
+container-only RPM assembly check. The image entrypoint copies the mounted
+checkout to a temporary container directory, runs `scripts/build-rpm.sh` as the
+unprivileged `builder` user, and copies only `dist/` back to the mounted
+workspace.

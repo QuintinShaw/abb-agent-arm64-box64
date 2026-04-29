@@ -53,11 +53,13 @@ x86_64 cross compiler in standard packages:
 
 ```bash
 podman build -f docker/Containerfile.rpm-build -t abb-rpm-build .
-podman run --rm -v "$PWD:/work:Z" -w /work abb-rpm-build ./scripts/build-rpm.sh
+podman run --rm -v "$PWD:/work:Z" abb-rpm-build
 ```
 
-This does not validate DKMS, systemd, SELinux, NAS registration, backup, or
-restore behavior.
+The container copies the mounted checkout into a temporary directory, runs the
+RPM builder as an unprivileged user, and copies only `dist/` back. This does
+not validate DKMS, systemd, SELinux, NAS registration, backup, or restore
+behavior.
 
 ## Install In A Disposable VM
 
