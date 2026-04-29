@@ -1,0 +1,23 @@
+MOUNT_2.19 {
+    global:
+        mnt_new_context;
+        mnt_free_context;
+        mnt_new_iter;
+        mnt_free_iter;
+        mnt_new_table;
+        mnt_free_table;
+        mnt_table_parse_file;
+        mnt_context_get_mtab;
+        mnt_table_next_fs;
+        mnt_fs_get_source;
+        mnt_fs_get_target;
+        mnt_fs_get_id;
+        mnt_fs_get_parent_id;
+    local: *;
+};
+
+MOUNT_2.20 {
+    global:
+        mnt_pretty_path;
+} MOUNT_2.19;
+

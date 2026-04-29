@@ -1,0 +1,26 @@
+#!/bin/sh
+set -eu
+
+ABB_HOME=${ABB_HOME:-/opt/Synology/ActiveBackupforBusiness}
+
+if [ -x /usr/local/bin/box64 ]; then
+    BOX64_BIN=/usr/local/bin/box64
+elif [ -x /usr/bin/box64 ]; then
+    BOX64_BIN=/usr/bin/box64
+else
+    echo "box64 not found at /usr/local/bin/box64 or /usr/bin/box64" >&2
+    exit 127
+fi
+
+BOX64_LIBS="$ABB_HOME/lib:/usr/lib/synosnap:$ABB_HOME/amd64-libs/lib/x86_64-linux-gnu:$ABB_HOME/amd64-libs/usr/lib/x86_64-linux-gnu:/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu:/usr/lib/box64-x86_64-linux-gnu"
+export BOX64_LD_LIBRARY_PATH="${BOX64_LD_LIBRARY_PATH:-$BOX64_LIBS}"
+export BOX64_PATH="${BOX64_PATH:-$ABB_HOME/bin:/usr/sbin:/usr/bin:/bin}"
+export LD_LIBRARY_PATH="${LD_LIBRARY_PATH:-$ABB_HOME/lib:/usr/lib/synosnap}"
+
+MOUNT_SHIM=/usr/local/lib/abb-agent-arm64-box64/mount_shim.so
+if [ -z "${BOX64_LD_PRELOAD:-}" ] && [ -f "$MOUNT_SHIM" ]; then
+    export BOX64_LD_PRELOAD="$MOUNT_SHIM"
+fi
+
+exec "$BOX64_BIN" "$ABB_HOME/bin/service-ctrl" "$@"
+

@@ -1,0 +1,20 @@
+[Unit]
+Description=Synology Active Backup for Business Agent via Box64 on ARM64
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=forking
+User=root
+Group=root
+ExecStart=/usr/local/bin/abb-box64-wrapper
+ExecStop=/bin/pkill -TERM -f synology-backupd
+Restart=on-failure
+RestartSec=5
+TimeoutStartSec=30
+TimeoutStopSec=30
+Environment=BOX64_LOG=0
+
+[Install]
+WantedBy=multi-user.target
+

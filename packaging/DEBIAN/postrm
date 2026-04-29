@@ -1,0 +1,18 @@
+#!/bin/sh
+set -e
+
+if [ "$1" = "purge" ]; then
+    if command -v systemctl >/dev/null 2>&1; then
+        systemctl stop abb-box64.service 2>/dev/null || true
+        systemctl daemon-reload 2>/dev/null || true
+    fi
+
+    if command -v dkms >/dev/null 2>&1; then
+        dkms remove -m synosnap -v 0.12.10 --all 2>/dev/null || true
+    fi
+
+    rmdir /usr/lib/synosnap 2>/dev/null || true
+fi
+
+exit 0
+

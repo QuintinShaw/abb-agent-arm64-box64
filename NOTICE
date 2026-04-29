@@ -1,0 +1,24 @@
+abb-agent-arm64-box64 NOTICE
+
+This repository contains community-authored scripts, packaging metadata, and
+documentation for local compatibility experiments.
+
+Synology, Active Backup for Business, and related product names are trademarks
+or registered trademarks of Synology Inc. Synology proprietary packages,
+binaries, shared libraries, and kernel module sources are not owned by this
+project and are not distributed in this repository.
+
+This project is not affiliated with, endorsed by, or supported by Synology Inc.
+
+Box64 is a separate third-party project by ptitSeb and contributors:
+https://github.com/ptitSeb/box64
+
+Referenced community work:
+- https://github.com/ardnew/synology-active-backup-business-agent
+- https://github.com/Peppershade/abb-linux-agent-6.12
+
+The local build script downloads or consumes official Synology packages on the
+user's machine and assembles a private local .deb for that user's own testing.
+Do not upload official Synology packages or generated packages containing
+Synology binaries to this repository or to GitHub Releases.
+

@@ -1,0 +1,13 @@
+#!/bin/sh
+set -e
+
+if command -v systemctl >/dev/null 2>&1; then
+    systemctl stop abb-box64.service 2>/dev/null || true
+fi
+
+pkill -TERM -f synology-backupd 2>/dev/null || true
+sleep 2 || true
+pkill -KILL -f synology-backupd 2>/dev/null || true
+
+exit 0
+
