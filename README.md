@@ -12,7 +12,7 @@ This repository does not contain or redistribute Synology binaries.
 
 This project is unofficial, unsupported by Synology, and intended only for learning, research, and interoperability experiments. Backup software must be validated by restore tests before it is trusted. You are responsible for your data, NAS, server, kernel, and recovery plan.
 
-Do not use this in production unless you have completed your own full restore validation, long-running stress tests, interrupted-backup tests, power-loss recovery tests, kernel upgrade tests, and bare-metal recovery tests.
+Do not use this in production unless you have completed your own production test plan covering full restore validation, long-running stress tests, interrupted-backup tests, power-loss recovery tests, kernel upgrade tests, package uninstall cleanup, SELinux/AppArmor behavior, and bare-metal recovery tests. See [docs/production-test-plan.md](docs/production-test-plan.md).
 
 ## What This Repository Does Not Contain
 
@@ -49,7 +49,7 @@ Validated checkpoints:
 
 See [docs/test-report.md](docs/test-report.md).
 
-## Install
+## Install Deb On Debian/Ubuntu
 
 ```bash
 sudo apt update
@@ -96,6 +96,25 @@ dist/abb-agent-arm64-box64_3.2.0-5053_arm64.deb
 
 This generated package is for your own local machine. Do not publish it to GitHub Releases because it contains Synology proprietary files extracted from the official package.
 
+## Build RPM On RPM-Based Systems
+
+RPM support is experimental and should be tested in a disposable ARM64 RPM VM or spare host:
+
+```bash
+./scripts/build-rpm.sh
+sudo dnf install ./dist/abb-agent-arm64-box64-3.2.0-5053.aarch64.rpm
+sudo systemctl start abb-box64.service
+sudo abb-cli -s
+```
+
+The RPM builder uses Synology's official x86_64 rpm zip and verifies the default download with a pinned SHA256. For manual input:
+
+```bash
+ABB_OFFICIAL_RPM_ZIP=/path/to/official-rpm.zip ABB_OFFICIAL_RPM_SHA256=<sha256> ./scripts/build-rpm.sh
+```
+
+See [docs/rpm.md](docs/rpm.md). RPM compatibility requires separate validation for `kernel-devel`, DKMS, systemd, SELinux, and the official rpm package layout.
+
 ## Release Policy
 
 Source-only releases are allowed. Do not attach generated `.deb` files, official Synology zip/deb files, extracted Synology files, NAS logs, or credentials to GitHub Releases.
@@ -123,6 +142,8 @@ Minimal safe validation flow:
 7. Compare restored file hashes against the source hashes.
 
 See [docs/restore-validation.md](docs/restore-validation.md) and [examples/abb-test-loop-device.md](examples/abb-test-loop-device.md).
+
+Production-oriented validation should also cover interrupted backups, forced reboots, kernel upgrades, package removal, and SELinux/AppArmor behavior. See [examples/production-test-checklist.md](examples/production-test-checklist.md).
 
 ## Compatibility Shim
 

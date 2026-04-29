@@ -1,5 +1,7 @@
 # Architecture
 
+[English](architecture.md) | [中文](architecture.zh-CN.md)
+
 `abb-agent-arm64-box64` packages a local compatibility stack for running the
 Synology Active Backup for Business Linux x86_64 Agent on ARM64.
 
@@ -50,4 +52,3 @@ The wrapper loads this shim with `BOX64_LD_PRELOAD` when present. It implements
 only the subset of libmount symbols ABB used during the PoC.
 
 This is a compatibility workaround, not a general libmount replacement.
-

@@ -1,5 +1,7 @@
 # Build
 
+[English](build.md) | [中文](build.zh-CN.md)
+
 Install build prerequisites:
 
 ```bash
@@ -45,6 +47,29 @@ dist/abb-agent-arm64-box64_3.2.0-5053_arm64.deb
 
 The generated deb contains Synology files extracted from the official package.
 It is for local private use only. Do not upload it to GitHub.
+
+## RPM Build
+
+RPM support uses Synology's official x86_64 rpm zip:
+
+```bash
+./scripts/build-rpm.sh
+```
+
+Manual official rpm zip:
+
+```bash
+ABB_OFFICIAL_RPM_ZIP=/path/to/Synology-ABB-Agent-x64-rpm.zip ABB_OFFICIAL_RPM_SHA256=<sha256> ./scripts/build-rpm.sh
+```
+
+Expected output:
+
+```text
+dist/abb-agent-arm64-box64-3.2.0-5053.aarch64.rpm
+```
+
+Install and validate the RPM only in a disposable RPM VM or spare test host.
+See [rpm.md](rpm.md) and [production-test-plan.md](production-test-plan.md).
 
 ## Build Inputs
 

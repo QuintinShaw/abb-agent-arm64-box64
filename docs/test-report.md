@@ -1,5 +1,7 @@
 # Public PoC Test Report
 
+[English](test-report.md) | [中文](test-report.zh-CN.md)
+
 Date: 2026-04-29
 
 This is a redacted public summary. NAS hostnames, accounts, tokens, device IDs,
@@ -110,4 +112,3 @@ Known risks:
 - No power-loss or interrupted-backup recovery test was performed.
 - No multi-kernel test matrix was performed.
 - No full bare-metal restore was performed.
-

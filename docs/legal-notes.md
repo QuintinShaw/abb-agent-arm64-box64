@@ -1,5 +1,7 @@
 # Legal Notes
 
+[English](legal-notes.md) | [中文](legal-notes.zh-CN.md)
+
 Synology and Active Backup for Business are trademarks or registered trademarks
 of Synology Inc.
 

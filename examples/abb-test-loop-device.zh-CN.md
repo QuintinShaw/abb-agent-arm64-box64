@@ -1,9 +1,8 @@
-# Safe Test Loop Device Example
+# 安全测试 Loop 设备示例
 
-[English](abb-test-loop-device.md) | [中文](abb-test-loop-device.zh-CN.md)
+[English](abb-test-loop-device.md) | 中文
 
-This example creates a temporary local block device for backup testing. Do not
-select `/` or Entire Device backup in the NAS UI.
+本示例创建一个临时本地块设备用于备份测试。不要在 NAS UI 里选择 `/` 或 Entire Device backup。
 
 ```bash
 sudo mkdir -p /mnt/abb-loop-test
@@ -22,7 +21,7 @@ sudo find /mnt/abb-loop-test/data -type f -exec sha256sum {} \; | sudo tee /mnt/
 sync
 ```
 
-After testing:
+测试后：
 
 ```bash
 sudo umount /mnt/abb-loop-test
@@ -31,5 +30,4 @@ sudo rm -f /tmp/abb-testdisk.img
 sudo rmdir /mnt/abb-loop-test
 ```
 
-Depending on ABB/NAS behavior, loop devices may not appear as custom volumes.
-The PoC used a temporary SCSI debug disk when loop devices were not sufficient.
+取决于 ABB/NAS 行为，loop 设备可能不会显示为自定义卷。PoC 中 loop 设备不足时使用了临时 SCSI debug disk。

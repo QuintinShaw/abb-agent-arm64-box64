@@ -1,5 +1,7 @@
 # Restore Validation
 
+[English](restore-validation.md) | [中文](restore-validation.zh-CN.md)
+
 Backup success is not enough. Validate restores before trusting any backup
 stack.
 
@@ -38,4 +40,3 @@ Recommended minimum flow:
    ```
 
 Only treat the test as passed when `diff` exits with status 0.
-

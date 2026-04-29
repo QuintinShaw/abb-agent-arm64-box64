@@ -1,5 +1,7 @@
 # Install
 
+[English](install.md) | [中文](install.zh-CN.md)
+
 Build the local deb first:
 
 ```bash

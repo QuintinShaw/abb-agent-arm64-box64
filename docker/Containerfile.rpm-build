@@ -1,0 +1,17 @@
+FROM debian:12-slim
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+      cpio \
+      gcc-x86-64-linux-gnu \
+      make \
+      rpm \
+      sed \
+      tar \
+      unzip \
+      wget \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /work
+
+CMD ["./scripts/build-rpm.sh"]
