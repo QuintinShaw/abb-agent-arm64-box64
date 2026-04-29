@@ -6,6 +6,7 @@ VERSION="3.2.0-5053"
 SYNOSNAP_VERSION="0.12.10"
 DEB_NAME="${PROJECT_NAME}_${VERSION}_arm64.deb"
 OFFICIAL_URL="https://global.synologydownload.com/download/Utility/ActiveBackupBusinessAgent/3.2.0-5053/Linux/x86_64/Synology%20Active%20Backup%20for%20Business%20Agent-3.2.0-5053-x64-deb.zip"
+OFFICIAL_SHA256="b6625ae7b8a5bfdcb03647f8335b7de70d6bb51d11da2c27ea3fec036a68a22f"
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 CACHE_DIR="$ROOT_DIR/cache"
@@ -32,11 +33,14 @@ case "$ARCH" in
     *) die "This builder must run on ARM64/aarch64. Current architecture: $ARCH" ;;
 esac
 
-if [ "$(id -u)" -ne 0 ]; then
-    die "Run as root: sudo ./scripts/build-deb.sh"
+if [ "$(id -u)" -eq 0 ] && [ "${ALLOW_ROOT_BUILD:-0}" != "1" ]; then
+    die "Do not run build-deb.sh as root. Run: ./scripts/build-deb.sh
+
+The build stage downloads and extracts external packages and should run as an
+unprivileged user. Use ALLOW_ROOT_BUILD=1 only for disposable CI or containers."
 fi
 
-for cmd in dpkg-deb unzip find sed install cp rm mkdir; do
+for cmd in dpkg-deb unzip find sed install cp rm mkdir sha256sum; do
     need_cmd "$cmd"
 done
 
@@ -51,8 +55,18 @@ mkdir -p "$ZIP_EXTRACT_DIR" "$AGENT_ROOT" "$SYNOSNAP_ROOT" "$PKG_ROOT"
 if [ -n "${ABB_OFFICIAL_ZIP:-}" ]; then
     [ -f "$ABB_OFFICIAL_ZIP" ] || die "ABB_OFFICIAL_ZIP does not exist: $ABB_OFFICIAL_ZIP"
     OFFICIAL_ZIP="$ABB_OFFICIAL_ZIP"
+    EXPECTED_SHA256="${ABB_OFFICIAL_SHA256:-}"
+    if [ -z "$EXPECTED_SHA256" ] && [ "${ABB_ALLOW_UNVERIFIED_ZIP:-0}" != "1" ]; then
+        die "ABB_OFFICIAL_SHA256 is required when ABB_OFFICIAL_ZIP is used.
+
+Example:
+  ABB_OFFICIAL_ZIP=/path/to/file.zip ABB_OFFICIAL_SHA256=<sha256> ./scripts/build-deb.sh
+
+Set ABB_ALLOW_UNVERIFIED_ZIP=1 only for disposable local experiments."
+    fi
 else
     OFFICIAL_ZIP="$ZIP_CACHE"
+    EXPECTED_SHA256="$OFFICIAL_SHA256"
     if [ ! -f "$OFFICIAL_ZIP" ]; then
         if command -v wget >/dev/null 2>&1; then
             wget -O "$OFFICIAL_ZIP" "$OFFICIAL_URL"
@@ -64,11 +78,21 @@ else
     fi
 fi
 
+if [ -n "${EXPECTED_SHA256:-}" ]; then
+    printf '%s  %s\n' "$EXPECTED_SHA256" "$OFFICIAL_ZIP" | sha256sum -c -
+elif [ "${ABB_ALLOW_UNVERIFIED_ZIP:-0}" = "1" ]; then
+    echo "WARNING: skipping official zip SHA256 verification by request." >&2
+else
+    die "No SHA256 verification configured."
+fi
+
 unzip -q "$OFFICIAL_ZIP" -d "$ZIP_EXTRACT_DIR"
 
 if [ -f "$ZIP_EXTRACT_DIR/install.run" ]; then
     RUN_EXTRACT_DIR="$ZIP_EXTRACT_DIR/install.run.extract"
     mkdir -p "$RUN_EXTRACT_DIR"
+    echo "Extracting makeself payload without running installer payload."
+    echo "This executes the makeself shell extractor as the current unprivileged user."
     sh "$ZIP_EXTRACT_DIR/install.run" --noexec --target "$RUN_EXTRACT_DIR"
 fi
 

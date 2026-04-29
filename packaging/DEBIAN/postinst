@@ -10,7 +10,24 @@ fi
 
 if [ -z "$BOX64_BIN" ]; then
     echo "ERROR: box64 was not found at /usr/local/bin/box64 or /usr/bin/box64." >&2
-    echo "Install Box64 first, for example: sudo /usr/share/doc/abb-agent-arm64-box64/install-box64.sh" >&2
+    echo "Install Box64 first. Options:" >&2
+    echo "  - distro/community package if available" >&2
+    echo "  - sudo /usr/share/doc/abb-agent-arm64-box64/install-box64.sh" >&2
+    echo "  - manual install from https://github.com/ptitSeb/box64" >&2
+    exit 1
+fi
+
+for cmd in dkms gcc make modprobe; do
+    if ! command -v "$cmd" >/dev/null 2>&1; then
+        echo "ERROR: missing required command: $cmd" >&2
+        exit 1
+    fi
+done
+
+if [ ! -e "/lib/modules/$(uname -r)/build" ]; then
+    echo "ERROR: kernel headers for $(uname -r) are missing." >&2
+    echo "Install the matching linux-headers package, then rerun:" >&2
+    echo "  sudo dpkg-reconfigure abb-agent-arm64-box64" >&2
     exit 1
 fi
 
@@ -31,4 +48,3 @@ echo "Start it with: sudo systemctl start abb-box64.service"
 echo "Register with: sudo abb-cli -c"
 
 exit 0
-

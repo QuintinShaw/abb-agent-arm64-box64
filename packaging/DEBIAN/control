@@ -3,9 +3,9 @@ Version: 3.2.0-5053
 Section: utils
 Priority: optional
 Architecture: arm64
-Maintainer: Community <your_email@example.com>
-Depends: dkms, build-essential, kmod, systemd, libc6
+Maintainer: Community <github@xyt.email>
+Depends: dkms, build-essential, gcc, make, binutils, kmod, systemd, libc6
+Recommends: linux-headers-arm64 | linux-headers-generic
 Description: Community ARM64 wrapper/package builder for Synology Active Backup for Business Agent via Box64
  Runs Synology ABB x86_64 Linux agent on ARM64 using Box64 and native ARM64 synosnap DKMS module.
  This package is unofficial and unsupported by Synology.
-

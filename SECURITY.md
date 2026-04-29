@@ -2,7 +2,7 @@
 
 Report security issues, legal concerns, or infringement requests to:
 
-`your_email@example.com`
+`github@xyt.email`
 
 Do not open public issues containing:
 

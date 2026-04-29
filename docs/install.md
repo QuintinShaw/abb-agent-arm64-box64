@@ -3,8 +3,12 @@
 Build the local deb first:
 
 ```bash
-sudo ./scripts/build-deb.sh
+./scripts/build-deb.sh
 ```
+
+Do not run the build step with `sudo`. It downloads and extracts external
+packages as an unprivileged user. Use `sudo` only for installing the generated
+package.
 
 Install it:
 
@@ -43,4 +47,3 @@ sudo abb-cli -s
 
 Do not accept an Entire Device backup task during initial validation. Use a
 small test scope and complete a restore/hash validation first.
-

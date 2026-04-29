@@ -4,6 +4,10 @@ Run Synology Active Backup for Business Linux x86_64 Agent on ARM64 using native
 
 Status: Experimental / PoC / Not production ready.
 
+Languages: English | [中文](README.zh-CN.md)
+
+This repository does not contain or redistribute Synology binaries.
+
 ## Risk Statement
 
 This project is unofficial, unsupported by Synology, and intended only for learning, research, and interoperability experiments. Backup software must be validated by restore tests before it is trusted. You are responsible for your data, NAS, server, kernel, and recovery plan.
@@ -53,7 +57,7 @@ sudo apt install -y git dkms build-essential "linux-headers-$(uname -r)" kmod sy
 git clone https://github.com/<your-name>/abb-agent-arm64-box64.git
 cd abb-agent-arm64-box64
 sudo ./scripts/install-box64.sh
-sudo ./scripts/build-deb.sh
+./scripts/build-deb.sh
 sudo dpkg -i dist/abb-agent-arm64-box64_3.2.0-5053_arm64.deb
 sudo apt -f install
 sudo systemctl start abb-box64.service
@@ -66,19 +70,23 @@ The service is not enabled automatically. Start it manually when testing:
 sudo systemctl start abb-box64.service
 ```
 
+`install-box64.sh` is a convenience helper. It defaults to `BOX64_REF=v0.4.2`, builds as `SUDO_USER` when available, and uses root only for dependency installation and final install. You can also install Box64 yourself.
+
 ## Build
 
 Default build downloads the official Synology zip:
 
 ```bash
-sudo ./scripts/build-deb.sh
+./scripts/build-deb.sh
 ```
 
 To use a manually downloaded official zip:
 
 ```bash
-ABB_OFFICIAL_ZIP=/path/to/official.zip sudo ./scripts/build-deb.sh
+ABB_OFFICIAL_ZIP=/path/to/official.zip ABB_OFFICIAL_SHA256=<sha256> ./scripts/build-deb.sh
 ```
+
+Do not run `build-deb.sh` with `sudo`. The build stage downloads and extracts external packages and intentionally runs as an unprivileged user. The generated deb can then be installed with `sudo dpkg -i`.
 
 Expected output:
 
@@ -87,6 +95,10 @@ dist/abb-agent-arm64-box64_3.2.0-5053_arm64.deb
 ```
 
 This generated package is for your own local machine. Do not publish it to GitHub Releases because it contains Synology proprietary files extracted from the official package.
+
+## Release Policy
+
+Source-only releases are allowed. Do not attach generated `.deb` files, official Synology zip/deb files, extracted Synology files, NAS logs, or credentials to GitHub Releases.
 
 ## Verify
 
@@ -130,7 +142,7 @@ This project is not affiliated with Synology Inc. and is not officially supporte
 
 This project does not distribute Synology proprietary binaries. Users must obtain official Synology packages from Synology. Scripts in this repository are provided for educational and interoperability research purposes only.
 
-If you believe this project infringes your rights, contact `your_email@example.com`.
+If you believe this project infringes your rights, contact `github@xyt.email`.
 
 ## References
 
@@ -138,4 +150,3 @@ If you believe this project infringes your rights, contact `your_email@example.c
 - https://github.com/Peppershade/abb-linux-agent-6.12
 - https://github.com/ptitSeb/box64
 - Synology official Active Backup for Business Agent download page
-

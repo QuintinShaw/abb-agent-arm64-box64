@@ -9,6 +9,10 @@ supported by Synology.
 This repository does not distribute Synology proprietary zip files, deb files,
 ELF binaries, shared libraries, or repackaged ABB debs.
 
+GitHub Releases for this project must be source-only. Do not attach generated
+deb packages, official Synology archives, extracted Synology files, NAS logs, or
+credentials.
+
 The local build script downloads or consumes official Synology packages on the
 user's machine. Users are responsible for obtaining those packages lawfully and
 complying with Synology's terms and licenses.
@@ -18,5 +22,4 @@ not be uploaded to GitHub, published as releases, or redistributed.
 
 If you believe this project infringes your rights, contact:
 
-`your_email@example.com`
-
+`github@xyt.email`
