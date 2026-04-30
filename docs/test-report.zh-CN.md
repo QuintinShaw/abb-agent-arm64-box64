@@ -105,3 +105,61 @@ ARM64 主机最初在 NAS 自定义卷列表中显示为空。排查发现：Box
 - 未执行断电或备份中断恢复测试。
 - 未执行多内核测试矩阵。
 - 未执行完整裸机恢复。
+
+## RPM VM 验证补充
+
+日期：2026-04-30
+
+本节总结一次独立的 RPM 系 VM 验证。NAS 主机名、账号、token、设备 ID、证书、内网域名和真实 UUID 均已省略。
+
+环境：
+
+- Rocky Linux 9.7 ARM64 VM
+- Kernel 5.14.0-611.49.1.el9_7.aarch64
+- SELinux Enforcing
+- 为目标发行版本地构建的 Box64 v0.4.2
+- Synology ABB Agent 3.2.0-5053 x86_64 用户态
+- `synosnap` 0.12.10 在 ARM64 上通过 DKMS 原生构建
+
+已验证检查点：
+
+- 容器中 RPM 组装：PASS
+- Rocky VM 中 RPM 安装：PASS
+- ARM64 原生 `synosnap` DKMS 编译/加载：PASS
+- 通过 Box64 启动 systemd 服务：PASS
+- 注册到私有 NAS：PASS
+- Entire Device 整机备份：PASS
+- 单文件恢复及 MD5 校验：PASS
+
+重要打包发现：
+
+- 本次使用的 Synology 官方 RPM archive 不包含 `/opt/Synology/ActiveBackupforBusiness/bin/abb-cli`。
+- 本地注册测试临时使用了从 Synology 官方 DEB archive 提取的 `abb-cli`。
+- 这仅是本地验证输入。不得重新分发该二进制，也不得重新分发包含它的生成包。
+
+备份结果：
+
+- NAS 任务源类型为 Entire Device。
+- 客户端为 `/boot` 和 `/` 创建 snapshot。
+- `/boot/efi`、`/boot` 和 `/` 内容被读取并上传。
+- 任务成功完成。
+- 完成后客户端状态为 `Idle - Completed`。
+- 报告传输量约 1.43 GB。
+
+恢复结果：
+
+- 备份后从 VM 删除了一个非敏感测试脚本。
+- 该文件通过 ABB 恢复。
+- 恢复后 MD5 与删除前一致：
+
+  ```text
+  41aa574c771a8671fe089b83ba890a5c
+  ```
+
+观察到的 caveat：
+
+- 日志中出现两条收尾阶段记录，形如 `Failed to transition snpashot`。
+- 最终服务端任务结果和 `abb-cli -s` 状态仍报告完成。
+- 备份结束后 `synosnap` snapshot device use count 回到 0。
+
+这次 RPM VM 验证提高了对 RPM 安装和基础备份/恢复行为的信心，但仍不是生产验证。它没有覆盖裸机恢复、长时间压力、备份中断恢复、断电恢复、内核升级存活或卸载清理。

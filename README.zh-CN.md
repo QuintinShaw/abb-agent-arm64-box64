@@ -49,6 +49,17 @@
 
 详见 [docs/test-report.zh-CN.md](docs/test-report.zh-CN.md)。
 
+2026-04-30 还完成了一次 RPM VM 验证：
+
+- Rocky Linux 9.7 ARM64 VM，kernel 5.14.0-611.49.1.el9_7.aarch64，SELinux Enforcing。
+- 本地构建的 RPM 安装成功，ARM64 原生 `synosnap` DKMS 成功加载。
+- `abb-box64.service` 通过 Box64 运行官方 x86_64 ABB daemon。
+- Agent 成功注册到私有 NAS 测试目标。
+- Entire Device 整机备份成功完成。
+- 单文件恢复后 MD5 与删除前一致。
+
+这仍不代表项目已适合生产环境。生产使用前仍必须完成裸机恢复、长时间压力、备份中断、断电、内核升级和卸载清理验证。
+
 ## 在 Debian/Ubuntu 上安装 deb
 
 ```bash
@@ -114,6 +125,7 @@ ABB_OFFICIAL_RPM_ZIP=/path/to/official-rpm.zip ABB_OFFICIAL_RPM_SHA256=<sha256> 
 ```
 
 详见 [docs/rpm.zh-CN.md](docs/rpm.zh-CN.md)。RPM 兼容需要分别验证 `kernel-devel`、DKMS、systemd、SELinux 和官方 rpm 包文件布局。
+本次验证使用的 Synology 官方 RPM archive 不包含 `abb-cli`；本地注册测试临时使用了从 Synology 官方 DEB archive 提取的 `abb-cli`。不要重新分发该二进制文件，也不要重新分发包含它的生成包。
 
 ## 发布规则
 

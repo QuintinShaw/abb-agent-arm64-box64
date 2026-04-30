@@ -109,6 +109,13 @@ The service is not enabled automatically.
 The official RPM payload may not include `/opt/Synology/ActiveBackupforBusiness/bin/abb-cli`,
 so use systemd and journal checks when `abb-cli` is absent.
 
+In the 2026-04-30 Rocky 9.7 ARM64 validation run, Synology's official RPM
+archive did not include `abb-cli`. Registration and status checks were tested
+by locally extracting `abb-cli` from Synology's official DEB archive and copying
+it into the disposable VM. This is acceptable for local validation with
+official user-provided inputs, but that binary and any generated packages that
+contain it must not be redistributed.
+
 The package creates `/opt/synosnap` for ABB's snapshot history database. If this
 directory is missing, `synology-backupd` can start and then exit with:
 
@@ -153,3 +160,28 @@ sudo journalctl -u abb-box64.service -n 200 --no-pager
 
 Do not add a broad allow policy until the denied path and operation are
 understood. Keep SELinux findings in the test report.
+
+## Observed Rocky 9.7 VM Result
+
+A disposable Rocky Linux 9.7 ARM64 VM was used for one RPM install and runtime
+validation run on 2026-04-30:
+
+- Kernel: `5.14.0-611.49.1.el9_7.aarch64`
+- SELinux: Enforcing
+- RPM install: PASS
+- Native ARM64 `synosnap` DKMS build/load: PASS
+- `abb-box64.service` start: PASS
+- Private NAS registration through Box64: PASS
+- Entire Device backup: PASS
+- Single-file restore with MD5 verification: PASS
+
+The first Entire Device backup completed successfully. The client log showed
+successful snapshots for `/boot` and `/`, successful upload of `/boot/efi`,
+`/boot`, and `/`, and a final task completion. `abb-cli -s` reported
+`Idle - Completed` after the run.
+
+The run also produced two post-completion log lines similar to
+`Failed to transition snpashot`. The server-side task result and client status
+still reported completion, and `synosnap` snapshot device use count returned
+to zero. Treat this as a finding to keep under observation rather than proof of
+production readiness.

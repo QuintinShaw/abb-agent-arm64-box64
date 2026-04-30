@@ -112,3 +112,70 @@ Known risks:
 - No power-loss or interrupted-backup recovery test was performed.
 - No multi-kernel test matrix was performed.
 - No full bare-metal restore was performed.
+
+## RPM VM Validation Addendum
+
+Date: 2026-04-30
+
+This addendum summarizes a separate RPM-based VM run. NAS hostnames, accounts,
+tokens, device IDs, certificates, internal domains, and real UUIDs are omitted.
+
+Environment:
+
+- Rocky Linux 9.7 ARM64 VM
+- Kernel 5.14.0-611.49.1.el9_7.aarch64
+- SELinux Enforcing
+- Box64 v0.4.2 built locally for the target distro
+- Synology ABB Agent 3.2.0-5053 x86_64 userspace
+- synosnap 0.12.10 built natively with DKMS on ARM64
+
+Validated checkpoints:
+
+- RPM assembly in a container: PASS
+- RPM install in the Rocky VM: PASS
+- Native ARM64 synosnap DKMS compile/load: PASS
+- systemd service start through Box64: PASS
+- Private NAS registration: PASS
+- Entire Device backup: PASS
+- Single-file restore with MD5 verification: PASS
+
+Important packaging finding:
+
+- The official Synology RPM archive used in this run did not include
+  `/opt/Synology/ActiveBackupforBusiness/bin/abb-cli`.
+- Local registration testing temporarily used `abb-cli` extracted from
+  Synology's official DEB archive.
+- This is a local validation input only. Do not redistribute the binary or any
+  generated package containing it.
+
+Backup result:
+
+- The NAS task source type was Entire Device.
+- The client created snapshots for `/boot` and `/`.
+- `/boot/efi`, `/boot`, and `/` content were read and uploaded.
+- The task completed successfully.
+- The client status after completion was `Idle - Completed`.
+- The reported transferred size was approximately 1.43 GB.
+
+Restore result:
+
+- A non-sensitive test script was deleted from the VM after backup.
+- The file was restored from ABB.
+- Restored MD5 matched the pre-delete MD5:
+
+  ```text
+  41aa574c771a8671fe089b83ba890a5c
+  ```
+
+Observed caveats:
+
+- The log showed two post-completion lines similar to
+  `Failed to transition snpashot`.
+- The final server-side task result and `abb-cli -s` status still reported
+  completion.
+- `synosnap` snapshot device use count returned to zero after the backup.
+
+This RPM VM run improves confidence in RPM installation and basic
+backup/restore behavior, but it is still not production validation. It did not
+cover bare-metal restore, long-running stress, interrupted backup recovery,
+power-loss recovery, kernel upgrade survival, or uninstall cleanup.

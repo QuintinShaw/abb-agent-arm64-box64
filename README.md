@@ -49,6 +49,19 @@ Validated checkpoints:
 
 See [docs/test-report.md](docs/test-report.md).
 
+Additional RPM VM validation was completed on 2026-04-30:
+
+- Rocky Linux 9.7 ARM64 VM, kernel 5.14.0-611.49.1.el9_7.aarch64, SELinux Enforcing.
+- Locally built RPM installed successfully with native ARM64 `synosnap` DKMS.
+- `abb-box64.service` ran the official x86_64 ABB daemon through Box64.
+- The agent registered to a private NAS test target.
+- An Entire Device backup completed successfully.
+- A single restored file matched the pre-delete MD5 checksum.
+
+This still does not make the project production ready. Bare-metal restore,
+long-running stress, interruption, power-loss, kernel-upgrade, and uninstall
+cleanup validation remain required before any production use.
+
 ## Install Deb On Debian/Ubuntu
 
 ```bash
@@ -114,6 +127,10 @@ ABB_OFFICIAL_RPM_ZIP=/path/to/official-rpm.zip ABB_OFFICIAL_RPM_SHA256=<sha256> 
 ```
 
 See [docs/rpm.md](docs/rpm.md). RPM compatibility requires separate validation for `kernel-devel`, DKMS, systemd, SELinux, and the official rpm package layout.
+The official Synology RPM archive used during validation did not include
+`abb-cli`; local registration testing temporarily used `abb-cli` extracted from
+the official Synology DEB archive. Do not redistribute that binary or any
+generated packages containing it.
 
 ## Release Policy
 

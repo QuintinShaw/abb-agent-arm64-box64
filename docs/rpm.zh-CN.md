@@ -83,6 +83,8 @@ sudo systemctl status abb-box64.service --no-pager
 服务不会自动启用。
 官方 RPM payload 可能不包含 `/opt/Synology/ActiveBackupforBusiness/bin/abb-cli`，因此 `abb-cli` 缺失时请使用 systemd 和 journal 检查。
 
+在 2026-04-30 的 Rocky 9.7 ARM64 验证中，Synology 官方 RPM archive 不包含 `abb-cli`。注册和状态检查是通过从 Synology 官方 DEB archive 本地提取 `abb-cli`，再复制到一次性 VM 中完成的。只要输入来自用户本地提供的官方包，这种方式可用于本地验证；但不得重新分发该二进制，也不得重新分发包含它的生成包。
+
 该包会创建 `/opt/synosnap`，供 ABB 保存 snapshot history 数据库。如果该目录缺失，`synology-backupd` 可能先启动然后退出，并在日志中显示：
 
 ```text
@@ -115,3 +117,20 @@ sudo journalctl -u abb-box64.service -n 200 --no-pager
 ```
 
 不要在理解被拒绝的路径和操作前添加宽泛 allow policy。SELinux 发现应记录在测试报告中。
+
+## Rocky 9.7 VM 实测结果
+
+2026-04-30 使用一次性 Rocky Linux 9.7 ARM64 VM 完成了一次 RPM 安装和运行验证：
+
+- Kernel：`5.14.0-611.49.1.el9_7.aarch64`
+- SELinux：Enforcing
+- RPM 安装：PASS
+- ARM64 原生 `synosnap` DKMS 构建/加载：PASS
+- `abb-box64.service` 启动：PASS
+- 经 Box64 注册到私有 NAS：PASS
+- Entire Device 整机备份：PASS
+- 单文件恢复及 MD5 校验：PASS
+
+首次 Entire Device 备份成功完成。客户端日志显示 `/boot` 和 `/` snapshot 创建成功，`/boot/efi`、`/boot` 和 `/` 内容上传成功，任务最终完成。运行结束后 `abb-cli -s` 报告 `Idle - Completed`。
+
+这次运行也出现了两条收尾阶段日志，形如 `Failed to transition snpashot`。服务端任务结果和客户端状态仍报告完成，且 `synosnap` snapshot device use count 回到 0。该现象应作为后续观察项记录，而不是生产就绪证明。
