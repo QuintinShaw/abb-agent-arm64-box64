@@ -101,20 +101,20 @@ library path such as `/usr/lib/box64-x86_64-linux-gnu`.
 
 ```bash
 sudo dnf install ./dist/abb-agent-arm64-box64-3.2.0-5053.aarch64.rpm
-sudo systemctl start abb-box64.service
+sudo systemctl enable --now abb-box64.service
 sudo systemctl status abb-box64.service --no-pager
 ```
 
-The service is not enabled automatically.
-The official RPM payload may not include `/opt/Synology/ActiveBackupforBusiness/bin/abb-cli`,
-so use systemd and journal checks when `abb-cli` is absent.
+The package does not enable the service automatically; use `enable --now` in
+test installations so the service survives a reboot.
 
-In the 2026-04-30 Rocky 9.7 ARM64 validation run, Synology's official RPM
-archive did not include `abb-cli`. Registration and status checks were tested
-by locally extracting `abb-cli` from Synology's official DEB archive and copying
-it into the disposable VM. This is acceptable for local validation with
-official user-provided inputs, but that binary and any generated packages that
-contain it must not be redistributed.
+Synology's official RPM archive places `abb-cli` at `/bin/abb-cli`, while
+`service-ctrl` and `synology-backupd` are under
+`/opt/Synology/ActiveBackupforBusiness/bin`. The builder copies the official
+`abb-cli` into the local ABB payload so the `/usr/local/bin/abb-cli` wrapper can
+run it through Box64. The official `sbdctl` from the synosnap RPM is handled the
+same way. These binaries are local validation inputs only and must not be
+redistributed.
 
 The package creates `/opt/synosnap` for ABB's snapshot history database. If this
 directory is missing, `synology-backupd` can start and then exit with:
@@ -128,7 +128,7 @@ The repository also includes a VM-side verifier:
 ```bash
 ./scripts/verify-rpm-vm.sh
 ./scripts/verify-rpm-vm.sh --install --rpm dist/abb-agent-arm64-box64-3.2.0-5053.aarch64.rpm
-./scripts/verify-rpm-vm.sh --install --start-service --rpm dist/abb-agent-arm64-box64-3.2.0-5053.aarch64.rpm
+./scripts/verify-rpm-vm.sh --install --enable-service --rpm dist/abb-agent-arm64-box64-3.2.0-5053.aarch64.rpm
 ./scripts/verify-rpm-vm.sh --uninstall
 ```
 
@@ -160,6 +160,19 @@ sudo journalctl -u abb-box64.service -n 200 --no-pager
 
 Do not add a broad allow policy until the denied path and operation are
 understood. Keep SELinux findings in the test report.
+
+## Official x86_64 RPM Usage
+
+The official RPM zip contains `README` and `install.run`. The README instructs
+x86_64 users to run the installer as root, then use `abb-cli -c` to connect to
+the Synology NAS and create a backup task. It also points users to `abb-cli -h`
+for command help.
+
+Inside the official RPM makeself payload, `install.sh` targets yum/rpm systems,
+checks for x86_64, installs dependencies such as the running kernel's
+`kernel-devel`, `make`, `bc`, and EPEL where needed, then installs the
+`synosnap` RPM and the ABB service RPM. That official flow installs `abb-cli`
+at `/bin/abb-cli` on x86_64 systems.
 
 ## Observed Rocky 9.7 VM Result
 

@@ -39,7 +39,7 @@ sudo dpkg -i dist/abb-agent-arm64-box64_3.2.0-5053_arm64.deb
 # or
 sudo dnf install ./dist/abb-agent-arm64-box64-3.2.0-5053.aarch64.rpm
 
-sudo systemctl start abb-box64.service
+sudo systemctl enable --now abb-box64.service
 ./scripts/verify-install.sh
 ```
 

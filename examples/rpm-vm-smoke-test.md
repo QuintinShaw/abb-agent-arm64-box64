@@ -55,20 +55,19 @@ dist/abb-agent-arm64-box64-3.2.0-5053.aarch64.rpm
 
 ```bash
 sudo dnf install ./dist/abb-agent-arm64-box64-3.2.0-5053.aarch64.rpm
-sudo systemctl start abb-box64.service
+sudo systemctl enable --now abb-box64.service
 sudo systemctl status abb-box64.service --no-pager
 ```
 
-The official RPM payload may not include every helper binary present in the deb
-payload. If `/opt/Synology/ActiveBackupforBusiness/bin/abb-cli` is absent, use
-systemd and journal checks for the smoke test instead of `abb-cli -s`.
+The official RPM payload places `abb-cli` at `/bin/abb-cli`; this builder
+relocates it into the local ABB payload so the wrapper can run it through Box64.
 
 Or run the packaged verifier:
 
 ```bash
 ./scripts/verify-rpm-vm.sh
 ./scripts/verify-rpm-vm.sh --install --rpm dist/abb-agent-arm64-box64-3.2.0-5053.aarch64.rpm
-./scripts/verify-rpm-vm.sh --start-service
+./scripts/verify-rpm-vm.sh --enable-service
 ```
 
 The first command is read-only. The install command verifies rpm metadata,

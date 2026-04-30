@@ -71,14 +71,14 @@ sudo ./scripts/install-box64.sh
 ./scripts/build-deb.sh
 sudo dpkg -i dist/abb-agent-arm64-box64_3.2.0-5053_arm64.deb
 sudo apt -f install
-sudo systemctl start abb-box64.service
+sudo systemctl enable --now abb-box64.service
 sudo abb-cli -c
 ```
 
-服务不会自动开机启用。测试时手动启动：
+服务不会自动开机启用。测试时手动启用并启动：
 
 ```bash
-sudo systemctl start abb-box64.service
+sudo systemctl enable --now abb-box64.service
 ```
 
 `install-box64.sh` 是便捷辅助脚本，默认 `BOX64_REF=v0.4.2`，有 `SUDO_USER` 时以该用户构建，只在安装依赖和最终安装时使用 root。你也可以自行安装 Box64。
@@ -111,10 +111,12 @@ dist/abb-agent-arm64-box64_3.2.0-5053_arm64.deb
 
 RPM 支持是实验性的，应在一次性 ARM64 RPM 虚拟机或备用主机上测试：
 
+安装生成的 RPM 前，请先安装与发行版兼容的 Box64、来自 EPEL 或其他可信来源的 DKMS、当前运行内核对应的 `kernel-devel-$(uname -r)`，以及 Box64 所需的 x86_64 运行库。Rocky/RHEL 注意事项见 [docs/rpm.zh-CN.md](docs/rpm.zh-CN.md)。
+
 ```bash
 ./scripts/build-rpm.sh
 sudo dnf install ./dist/abb-agent-arm64-box64-3.2.0-5053.aarch64.rpm
-sudo systemctl start abb-box64.service
+sudo systemctl enable --now abb-box64.service
 sudo abb-cli -s
 ```
 
@@ -125,7 +127,7 @@ ABB_OFFICIAL_RPM_ZIP=/path/to/official-rpm.zip ABB_OFFICIAL_RPM_SHA256=<sha256> 
 ```
 
 详见 [docs/rpm.zh-CN.md](docs/rpm.zh-CN.md)。RPM 兼容需要分别验证 `kernel-devel`、DKMS、systemd、SELinux 和官方 rpm 包文件布局。
-本次验证使用的 Synology 官方 RPM archive 不包含 `abb-cli`；本地注册测试临时使用了从 Synology 官方 DEB archive 提取的 `abb-cli`。不要重新分发该二进制文件，也不要重新分发包含它的生成包。
+Synology 官方 RPM archive 将 `abb-cli` 放在 `/bin/abb-cli`；本构建器会把这个官方二进制重新放入本地 ABB payload，让 `/usr/local/bin/abb-cli` wrapper 可通过 Box64 工作。不要重新分发该二进制文件，也不要重新分发包含它的生成包。
 
 ## 发布规则
 

@@ -11,7 +11,7 @@ usage() {
 Usage:
   ./scripts/verify-rpm-vm.sh
   ./scripts/verify-rpm-vm.sh --install --rpm dist/abb-agent-arm64-box64-3.2.0-5053.aarch64.rpm
-  ./scripts/verify-rpm-vm.sh --install --start-service --rpm dist/abb-agent-arm64-box64-3.2.0-5053.aarch64.rpm
+  ./scripts/verify-rpm-vm.sh --install --enable-service --rpm dist/abb-agent-arm64-box64-3.2.0-5053.aarch64.rpm
   ./scripts/verify-rpm-vm.sh --uninstall
 
 Run only in a disposable ARM64 RPM-based VM or spare test host.
@@ -61,6 +61,10 @@ while [ "$#" -gt 0 ]; do
             shift
             ;;
         --start-service)
+            START_SERVICE=1
+            shift
+            ;;
+        --enable-service)
             START_SERVICE=1
             shift
             ;;
@@ -206,7 +210,7 @@ lsmod | grep synosnap || true
 ls -l /dev/synosnap* 2>/dev/null || true
 
 if [ "$START_SERVICE" -eq 1 ]; then
-    run sudo systemctl start abb-box64.service
+    run sudo systemctl enable --now abb-box64.service
 fi
 
 echo

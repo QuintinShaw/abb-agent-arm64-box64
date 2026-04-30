@@ -115,6 +115,12 @@ else
     die "Official agent package did not contain /opt/Synology/ActiveBackupforBusiness"
 fi
 
+if [ -x "$AGENT_ROOT/bin/abb-cli" ]; then
+    install -m 0755 "$AGENT_ROOT/bin/abb-cli" "$PKG_ROOT/opt/Synology/ActiveBackupforBusiness/bin/abb-cli"
+else
+    die "Official agent package did not contain /bin/abb-cli."
+fi
+
 mkdir -p "$PKG_ROOT/opt/synosnap"
 
 SYNOSNAP_SRC="$(find "$SYNOSNAP_ROOT/usr/src" "$AGENT_ROOT/usr/src" -maxdepth 2 -type d -name 'synosnap-*' 2>/dev/null | head -n 1 || true)"
@@ -126,6 +132,12 @@ LIBSYNOSNAP="$(find "$AGENT_ROOT" "$SYNOSNAP_ROOT" -type f -name 'libsynosnap.so
 [ -n "$LIBSYNOSNAP" ] || die "Could not locate x86_64 libsynosnap.so in official packages."
 mkdir -p "$PKG_ROOT/usr/lib/synosnap"
 cp -a "$LIBSYNOSNAP" "$PKG_ROOT/usr/lib/synosnap/libsynosnap.so"
+
+if [ -x "$SYNOSNAP_ROOT/bin/sbdctl" ]; then
+    install -m 0755 "$SYNOSNAP_ROOT/bin/sbdctl" "$PKG_ROOT/opt/Synology/ActiveBackupforBusiness/bin/sbdctl"
+else
+    die "Official synosnap package did not contain /bin/sbdctl."
+fi
 
 cp -a "$ROOT_DIR/packaging/etc" "$PKG_ROOT/"
 mkdir -p "$PKG_ROOT/usr/local/bin" "$PKG_ROOT/usr/local/lib/abb-agent-arm64-box64"
@@ -157,7 +169,7 @@ echo
 echo "Install with:"
 echo "  sudo dpkg -i dist/$DEB_NAME"
 echo "  sudo apt -f install"
-echo "  sudo systemctl start abb-box64.service"
+echo "  sudo systemctl enable --now abb-box64.service"
 echo "  sudo systemctl status abb-box64.service --no-pager"
 echo
 echo "Do not upload dist/*.deb to GitHub; it contains Synology proprietary files from the official package."

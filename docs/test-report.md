@@ -141,12 +141,14 @@ Validated checkpoints:
 
 Important packaging finding:
 
-- The official Synology RPM archive used in this run did not include
-  `/opt/Synology/ActiveBackupforBusiness/bin/abb-cli`.
-- Local registration testing temporarily used `abb-cli` extracted from
+- The official Synology RPM archive places `abb-cli` at `/bin/abb-cli`, not
+  under `/opt/Synology/ActiveBackupforBusiness/bin`.
+- The wrapper package used for this run had not copied that location yet, so
+  local registration testing temporarily used `abb-cli` extracted from
   Synology's official DEB archive.
-- This is a local validation input only. Do not redistribute the binary or any
-  generated package containing it.
+- The builder now relocates the official RPM `abb-cli` into the local ABB
+  payload. Do not redistribute the binary or any generated package containing
+  it.
 
 Backup result:
 

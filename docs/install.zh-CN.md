@@ -26,10 +26,10 @@ sudo apt -f install
 
 服务不会自动启用。
 
-手动启动：
+手动启用并启动：
 
 ```bash
-sudo systemctl start abb-box64.service
+sudo systemctl enable --now abb-box64.service
 sudo systemctl status abb-box64.service --no-pager
 ```
 

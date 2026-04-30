@@ -133,9 +133,9 @@ ARM64 主机最初在 NAS 自定义卷列表中显示为空。排查发现：Box
 
 重要打包发现：
 
-- 本次使用的 Synology 官方 RPM archive 不包含 `/opt/Synology/ActiveBackupforBusiness/bin/abb-cli`。
-- 本地注册测试临时使用了从 Synology 官方 DEB archive 提取的 `abb-cli`。
-- 这仅是本地验证输入。不得重新分发该二进制，也不得重新分发包含它的生成包。
+- Synology 官方 RPM archive 将 `abb-cli` 放在 `/bin/abb-cli`，不在 `/opt/Synology/ActiveBackupforBusiness/bin` 下。
+- 本次运行使用的 wrapper package 当时还没有复制这个位置，因此本地注册测试临时使用了从 Synology 官方 DEB archive 提取的 `abb-cli`。
+- 构建器现在会把官方 RPM 中的 `abb-cli` 重新放入本地 ABB payload。不得重新分发该二进制，也不得重新分发包含它的生成包。
 
 备份结果：
 

@@ -44,18 +44,18 @@ dist/abb-agent-arm64-box64-3.2.0-5053.aarch64.rpm
 
 ```bash
 sudo dnf install ./dist/abb-agent-arm64-box64-3.2.0-5053.aarch64.rpm
-sudo systemctl start abb-box64.service
+sudo systemctl enable --now abb-box64.service
 sudo systemctl status abb-box64.service --no-pager
 ```
 
-官方 RPM payload 可能不包含 deb payload 中的所有辅助二进制。如果 `/opt/Synology/ActiveBackupforBusiness/bin/abb-cli` 不存在，smoke test 请使用 systemd 和 journal 检查，不要依赖 `abb-cli -s`。
+官方 RPM payload 将 `abb-cli` 放在 `/bin/abb-cli`；本构建器会把它重新放入本地 ABB payload，使 wrapper 可以通过 Box64 运行它。
 
 也可以运行仓库内验证脚本：
 
 ```bash
 ./scripts/verify-rpm-vm.sh
 ./scripts/verify-rpm-vm.sh --install --rpm dist/abb-agent-arm64-box64-3.2.0-5053.aarch64.rpm
-./scripts/verify-rpm-vm.sh --start-service
+./scripts/verify-rpm-vm.sh --enable-service
 ```
 
 第一条命令只读。安装命令会检查 rpm 元数据，通过 `dnf` 或 `yum` 安装包，检查 DKMS 状态、内核模块、systemd 状态，并收集最近 journal 和 SELinux denial。它不会把主机注册到 NAS，也不会启动备份。

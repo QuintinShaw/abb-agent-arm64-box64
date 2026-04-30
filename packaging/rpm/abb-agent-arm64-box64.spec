@@ -81,8 +81,8 @@ systemctl daemon-reload || true
 
 echo "abb-agent-arm64-box64 installed."
 echo "Service was not enabled automatically."
-echo "Start it with: sudo systemctl start abb-box64.service"
-echo "If the official payload includes abb-cli, register with: sudo abb-cli -c"
+echo "Enable and start it with: sudo systemctl enable --now abb-box64.service"
+echo "Register with: sudo abb-cli -c"
 
 %preun
 if [ "$1" = "0" ]; then

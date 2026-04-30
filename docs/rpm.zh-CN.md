@@ -76,14 +76,13 @@ Box64 还必须能找到官方 ABB 二进制需要的 x86_64 GNU 运行库。在
 
 ```bash
 sudo dnf install ./dist/abb-agent-arm64-box64-3.2.0-5053.aarch64.rpm
-sudo systemctl start abb-box64.service
+sudo systemctl enable --now abb-box64.service
 sudo systemctl status abb-box64.service --no-pager
 ```
 
-服务不会自动启用。
-官方 RPM payload 可能不包含 `/opt/Synology/ActiveBackupforBusiness/bin/abb-cli`，因此 `abb-cli` 缺失时请使用 systemd 和 journal 检查。
+该包不会自动启用服务；测试安装时请使用 `enable --now`，确保重启后服务仍会运行。
 
-在 2026-04-30 的 Rocky 9.7 ARM64 验证中，Synology 官方 RPM archive 不包含 `abb-cli`。注册和状态检查是通过从 Synology 官方 DEB archive 本地提取 `abb-cli`，再复制到一次性 VM 中完成的。只要输入来自用户本地提供的官方包，这种方式可用于本地验证；但不得重新分发该二进制，也不得重新分发包含它的生成包。
+Synology 官方 RPM archive 将 `abb-cli` 放在 `/bin/abb-cli`，而 `service-ctrl` 和 `synology-backupd` 位于 `/opt/Synology/ActiveBackupforBusiness/bin`。构建器会把官方 `abb-cli` 复制进本地 ABB payload，使 `/usr/local/bin/abb-cli` wrapper 可以通过 Box64 运行它。synosnap RPM 中的官方 `sbdctl` 也按同样方式处理。这些二进制只属于本地验证输入，不得重新分发。
 
 该包会创建 `/opt/synosnap`，供 ABB 保存 snapshot history 数据库。如果该目录缺失，`synology-backupd` 可能先启动然后退出，并在日志中显示：
 
@@ -96,7 +95,7 @@ SnapshotHistoryDB: Failed to open database at '/opt/synosnap/snapshot-history-db
 ```bash
 ./scripts/verify-rpm-vm.sh
 ./scripts/verify-rpm-vm.sh --install --rpm dist/abb-agent-arm64-box64-3.2.0-5053.aarch64.rpm
-./scripts/verify-rpm-vm.sh --install --start-service --rpm dist/abb-agent-arm64-box64-3.2.0-5053.aarch64.rpm
+./scripts/verify-rpm-vm.sh --install --enable-service --rpm dist/abb-agent-arm64-box64-3.2.0-5053.aarch64.rpm
 ./scripts/verify-rpm-vm.sh --uninstall
 ```
 
@@ -117,6 +116,12 @@ sudo journalctl -u abb-box64.service -n 200 --no-pager
 ```
 
 不要在理解被拒绝的路径和操作前添加宽泛 allow policy。SELinux 发现应记录在测试报告中。
+
+## 官方 x86_64 RPM 用法
+
+官方 RPM zip 包含 `README` 和 `install.run`。README 要求 x86_64 用户以 root 身份运行安装器，安装完成后使用 `abb-cli -c` 连接 Synology NAS 并创建备份任务，也说明可用 `abb-cli -h` 查看命令帮助。
+
+官方 RPM makeself payload 中的 `install.sh` 面向 yum/rpm 系统，会检查 x86_64、安装当前内核对应的 `kernel-devel`、`make`、`bc` 以及必要时的 EPEL，然后安装 `synosnap` RPM 和 ABB service RPM。该官方流程会在 x86_64 系统上把 `abb-cli` 安装到 `/bin/abb-cli`。
 
 ## Rocky 9.7 VM 实测结果
 

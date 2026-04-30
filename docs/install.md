@@ -28,10 +28,10 @@ The package post-install step:
 
 The service is not enabled automatically.
 
-Start it manually:
+Enable and start it manually:
 
 ```bash
-sudo systemctl start abb-box64.service
+sudo systemctl enable --now abb-box64.service
 sudo systemctl status abb-box64.service --no-pager
 ```
 

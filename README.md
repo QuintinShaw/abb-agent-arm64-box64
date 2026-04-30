@@ -73,14 +73,14 @@ sudo ./scripts/install-box64.sh
 ./scripts/build-deb.sh
 sudo dpkg -i dist/abb-agent-arm64-box64_3.2.0-5053_arm64.deb
 sudo apt -f install
-sudo systemctl start abb-box64.service
+sudo systemctl enable --now abb-box64.service
 sudo abb-cli -c
 ```
 
-The service is not enabled automatically. Start it manually when testing:
+The service is not enabled automatically. Enable and start it manually when testing:
 
 ```bash
-sudo systemctl start abb-box64.service
+sudo systemctl enable --now abb-box64.service
 ```
 
 `install-box64.sh` is a convenience helper. It defaults to `BOX64_REF=v0.4.2`, builds as `SUDO_USER` when available, and uses root only for dependency installation and final install. You can also install Box64 yourself.
@@ -113,10 +113,15 @@ This generated package is for your own local machine. Do not publish it to GitHu
 
 RPM support is experimental and should be tested in a disposable ARM64 RPM VM or spare host:
 
+Before installing the generated RPM, install a distro-compatible Box64, DKMS
+from EPEL or another trusted source, matching `kernel-devel-$(uname -r)`, and
+the x86_64 runtime libraries needed by Box64. See [docs/rpm.md](docs/rpm.md)
+for the Rocky/RHEL notes.
+
 ```bash
 ./scripts/build-rpm.sh
 sudo dnf install ./dist/abb-agent-arm64-box64-3.2.0-5053.aarch64.rpm
-sudo systemctl start abb-box64.service
+sudo systemctl enable --now abb-box64.service
 sudo abb-cli -s
 ```
 
@@ -127,10 +132,10 @@ ABB_OFFICIAL_RPM_ZIP=/path/to/official-rpm.zip ABB_OFFICIAL_RPM_SHA256=<sha256> 
 ```
 
 See [docs/rpm.md](docs/rpm.md). RPM compatibility requires separate validation for `kernel-devel`, DKMS, systemd, SELinux, and the official rpm package layout.
-The official Synology RPM archive used during validation did not include
-`abb-cli`; local registration testing temporarily used `abb-cli` extracted from
-the official Synology DEB archive. Do not redistribute that binary or any
-generated packages containing it.
+Synology's official RPM archive places `abb-cli` at `/bin/abb-cli`; this
+builder relocates that official binary into the local ABB payload so the
+`/usr/local/bin/abb-cli` wrapper works through Box64. Do not redistribute that
+binary or any generated package containing it.
 
 ## Release Policy
 
