@@ -66,6 +66,8 @@ if [ ! -e "/lib/modules/$(uname -r)/build" ]; then
     exit 1
 fi
 
+install -d -m 0755 /opt/synosnap
+
 if [ -d /usr/src/synosnap-@SYNOSNAP_VERSION@ ]; then
     dkms add -m synosnap -v @SYNOSNAP_VERSION@ 2>/dev/null || true
     dkms build -m synosnap -v @SYNOSNAP_VERSION@
@@ -80,23 +82,22 @@ systemctl daemon-reload || true
 echo "abb-agent-arm64-box64 installed."
 echo "Service was not enabled automatically."
 echo "Start it with: sudo systemctl start abb-box64.service"
-echo "Register with: sudo abb-cli -c"
+echo "If the official payload includes abb-cli, register with: sudo abb-cli -c"
 
 %preun
 if [ "$1" = "0" ]; then
     systemctl stop abb-box64.service >/dev/null 2>&1 || true
     pkill -TERM -x synology-backupd >/dev/null 2>&1 || true
+    dkms remove -m synosnap -v @SYNOSNAP_VERSION@ --all >/dev/null 2>&1 || true
 fi
 
 %postun
 systemctl daemon-reload >/dev/null 2>&1 || true
-if [ "$1" = "0" ]; then
-    dkms remove -m synosnap -v @SYNOSNAP_VERSION@ --all >/dev/null 2>&1 || true
-fi
 
 %files
 /usr/share/doc/%{name}
 /opt/Synology/ActiveBackupforBusiness
+/opt/synosnap
 /usr/src/synosnap-@SYNOSNAP_VERSION@
 /usr/lib/synosnap/libsynosnap.so
 /usr/local/bin/abb-box64-wrapper

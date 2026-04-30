@@ -142,6 +142,30 @@ else
     echo "WARN: box64 not found at /usr/local/bin/box64 or /usr/bin/box64"
 fi
 
+echo
+echo "Box64 x86_64 runtime libraries:"
+for lib in libstdc++.so.6 libgcc_s.so.1; do
+    found=""
+    for dir in \
+        /opt/Synology/ActiveBackupforBusiness/lib \
+        /opt/Synology/ActiveBackupforBusiness/amd64-libs/lib/x86_64-linux-gnu \
+        /opt/Synology/ActiveBackupforBusiness/amd64-libs/usr/lib/x86_64-linux-gnu \
+        /usr/lib/box64-x86_64-linux-gnu \
+        /usr/lib/x86_64-linux-gnu \
+        /lib/x86_64-linux-gnu
+    do
+        if [ -e "$dir/$lib" ]; then
+            found="$dir/$lib"
+            break
+        fi
+    done
+    if [ -n "$found" ]; then
+        echo "OK: $lib found at $found"
+    else
+        echo "WARN: $lib was not found in common Box64 x86_64 library paths."
+    fi
+done
+
 if command -v getenforce >/dev/null 2>&1; then
     echo "SELinux: $(getenforce)"
 else
@@ -193,10 +217,13 @@ systemctl status abb-box64.service --no-pager || true
 
 echo
 echo "ABB CLI:"
-if command -v abb-cli >/dev/null 2>&1; then
+if [ -x /opt/Synology/ActiveBackupforBusiness/bin/abb-cli ] && command -v abb-cli >/dev/null 2>&1; then
     abb-cli -s || true
+elif command -v service-ctrl >/dev/null 2>&1; then
+    echo "abb-cli binary not found in the official package; running service-ctrl status probe."
+    service-ctrl -s || true
 else
-    echo "abb-cli wrapper not found"
+    echo "abb-cli and service-ctrl wrappers not found"
 fi
 
 echo

@@ -9,5 +9,10 @@ pkill -TERM -f synology-backupd 2>/dev/null || true
 sleep 2 || true
 pkill -KILL -f synology-backupd 2>/dev/null || true
 
-exit 0
+if [ "$1" = "remove" ] || [ "$1" = "deconfigure" ]; then
+    if command -v dkms >/dev/null 2>&1; then
+        dkms remove -m synosnap -v 0.12.10 --all 2>/dev/null || true
+    fi
+fi
 
+exit 0

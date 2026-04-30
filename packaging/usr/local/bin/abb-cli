@@ -22,5 +22,9 @@ if [ -z "${BOX64_LD_PRELOAD:-}" ] && [ -f "$MOUNT_SHIM" ]; then
     export BOX64_LD_PRELOAD="$MOUNT_SHIM"
 fi
 
-exec "$BOX64_BIN" "$ABB_HOME/bin/abb-cli" "$@"
+if [ ! -x "$ABB_HOME/bin/abb-cli" ]; then
+    echo "$ABB_HOME/bin/abb-cli not found in the official package payload" >&2
+    exit 127
+fi
 
+exec "$BOX64_BIN" "$ABB_HOME/bin/abb-cli" "$@"

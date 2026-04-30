@@ -28,10 +28,13 @@ systemctl is-enabled abb-box64.service || true
 
 echo
 echo "ABB CLI:"
-if command -v abb-cli >/dev/null 2>&1; then
+if [ -x /opt/Synology/ActiveBackupforBusiness/bin/abb-cli ] && command -v abb-cli >/dev/null 2>&1; then
     abb-cli -s || true
+elif command -v service-ctrl >/dev/null 2>&1; then
+    echo "abb-cli binary not found in the official package; running service-ctrl status probe."
+    service-ctrl -s || true
 else
-    echo "abb-cli wrapper not found"
+    echo "abb-cli and service-ctrl wrappers not found"
 fi
 
 echo

@@ -52,13 +52,42 @@ podman run --rm -v "$PWD:/work:Z" abb-rpm-build
 
 ## 在一次性 VM 中安装
 
+RHEL-like 系统通常需要 EPEL，或另一个可信 DKMS 仓库，才能安装该包。请安装当前运行内核对应的 headers，而不是只安装仓库里的最新内核 headers：
+
+```bash
+sudo dnf install -y epel-release
+echo HARDLINK=no | sudo tee /etc/sysconfig/kernel
+sudo dnf install -y --setopt=install_weak_deps=False \
+  dkms gcc make "kernel-devel-$(uname -r)" elfutils-libelf-devel
+```
+
+Box64 必须用与目标发行版兼容的方式安装。存在可信发行版包时，应优先使用发行版包。Fedora 已打包 Box64，因此 Fedora 测试 VM 可以走发行版包路线：
+
+```bash
+sudo dnf install -y box64
+```
+
+不要直接从其他发行版复制 Box64 二进制，除非已确认 glibc 兼容性。例如，在 Ubuntu 22.04 上构建的 Box64 可能需要 `GLIBC_2.35`，在只提供 glibc 2.34 的 Rocky/RHEL 9 上会失败。Fedora RPM 也可能要求比 Rocky/RHEL 9 更新的 glibc。
+
+如果目标 RPM 发行版没有可信兼容的 Box64 包，不要在无 KVM 的慢速 VM 里耗时编译 Box64。请使用物理 ARM64 主机、带 KVM 的 ARM64 VM，或 EL9 兼容的 ARM64 构建环境，然后只把本地构建出的 Box64 二进制复制进一次性 VM 做包验证。
+
+Box64 还必须能找到官方 ABB 二进制需要的 x86_64 GNU 运行库。在 Rocky/RHEL 9 上，如果缺少这些 x86_64 库，服务启动可能会失败并提示
+`Error loading needed lib libstdc++.so.6` 或 `libgcc_s.so.1`。应通过可信 Box64/发行版机制安装它们；仅用于一次性验证时，也可以把 Rocky x86_64 包解包到 Box64 库路径，例如 `/usr/lib/box64-x86_64-linux-gnu`。
+
 ```bash
 sudo dnf install ./dist/abb-agent-arm64-box64-3.2.0-5053.aarch64.rpm
 sudo systemctl start abb-box64.service
-sudo abb-cli -s
+sudo systemctl status abb-box64.service --no-pager
 ```
 
 服务不会自动启用。
+官方 RPM payload 可能不包含 `/opt/Synology/ActiveBackupforBusiness/bin/abb-cli`，因此 `abb-cli` 缺失时请使用 systemd 和 journal 检查。
+
+该包会创建 `/opt/synosnap`，供 ABB 保存 snapshot history 数据库。如果该目录缺失，`synology-backupd` 可能先启动然后退出，并在日志中显示：
+
+```text
+SnapshotHistoryDB: Failed to open database at '/opt/synosnap/snapshot-history-db.sqlite'
+```
 
 仓库也包含 VM 侧验证脚本：
 
@@ -70,6 +99,8 @@ sudo abb-cli -s
 ```
 
 默认模式只读。安装和卸载模式必须显式指定，因为它们会改变系统包、DKMS 状态和 systemd 状态。该验证脚本不会注册 NAS、创建任务或执行备份/恢复测试。
+
+在没有 KVM 的慢速模拟 VM 中，DKMS 可能耗时很长，因为 Synology 的 `synosnap` 构建会先执行大量内核 API feature probe，然后才编译最终模块。TCG-only QEMU 不适合做这类验证。RPM 安装验证更建议使用物理 ARM64 主机或带 KVM 的 ARM64 VM。
 
 ## SELinux
 

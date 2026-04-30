@@ -63,13 +63,58 @@ behavior.
 
 ## Install In A Disposable VM
 
+RHEL-like systems usually need EPEL, or another trusted DKMS repository,
+before this package can be installed. Install the headers for the running
+kernel, not only the latest available kernel:
+
+```bash
+sudo dnf install -y epel-release
+echo HARDLINK=no | sudo tee /etc/sysconfig/kernel
+sudo dnf install -y --setopt=install_weak_deps=False \
+  dkms gcc make "kernel-devel-$(uname -r)" elfutils-libelf-devel
+```
+
+Install Box64 with a method that is compatible with the target distribution.
+Prefer a trusted distribution package when one exists. Fedora packages Box64,
+so Fedora test VMs can use the distro package route:
+
+```bash
+sudo dnf install -y box64
+```
+
+Do not copy a Box64 binary from another distro unless you have verified its
+glibc compatibility. For example, a Box64 binary built on Ubuntu 22.04 can
+require `GLIBC_2.35` and fail on Rocky/RHEL 9 systems that provide glibc 2.34.
+Fedora RPMs may also require a newer glibc than Rocky/RHEL 9 provides.
+
+If no trusted compatible Box64 package exists for the target RPM distro, do not
+spend time building Box64 in a slow no-KVM VM. Use a physical ARM64 host, an
+ARM64 VM with KVM, or an EL9-compatible ARM64 build environment, then copy only
+the locally built Box64 binary into the disposable VM for package validation.
+
+Box64 must also be able to find x86_64 GNU runtime libraries required by the
+official ABB binaries. On Rocky/RHEL 9, a service start can fail with
+`Error loading needed lib libstdc++.so.6` or `libgcc_s.so.1` if those x86_64
+libraries are absent. Install them through a trusted Box64/distro mechanism, or
+for disposable validation only, extract the x86_64 Rocky packages into a Box64
+library path such as `/usr/lib/box64-x86_64-linux-gnu`.
+
 ```bash
 sudo dnf install ./dist/abb-agent-arm64-box64-3.2.0-5053.aarch64.rpm
 sudo systemctl start abb-box64.service
-sudo abb-cli -s
+sudo systemctl status abb-box64.service --no-pager
 ```
 
 The service is not enabled automatically.
+The official RPM payload may not include `/opt/Synology/ActiveBackupforBusiness/bin/abb-cli`,
+so use systemd and journal checks when `abb-cli` is absent.
+
+The package creates `/opt/synosnap` for ABB's snapshot history database. If this
+directory is missing, `synology-backupd` can start and then exit with:
+
+```text
+SnapshotHistoryDB: Failed to open database at '/opt/synosnap/snapshot-history-db.sqlite'
+```
 
 The repository also includes a VM-side verifier:
 
@@ -83,6 +128,11 @@ The repository also includes a VM-side verifier:
 Default mode is read-only. Install and uninstall modes are explicit because
 they change system packages, DKMS state, and systemd state. The verifier does
 not register to NAS, create tasks, or run backup/restore tests.
+
+On slow emulated VMs without KVM, DKMS may take a very long time because
+Synology's `synosnap` build runs many kernel API feature probes before compiling
+the final module. This is not a good use of TCG-only QEMU. Prefer a physical
+ARM64 host or an ARM64 VM with KVM for RPM install validation.
 
 ## SELinux
 

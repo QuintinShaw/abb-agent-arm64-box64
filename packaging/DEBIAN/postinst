@@ -31,6 +31,8 @@ if [ ! -e "/lib/modules/$(uname -r)/build" ]; then
     exit 1
 fi
 
+install -d -m 0755 /opt/synosnap
+
 if [ -d /usr/src/synosnap-0.12.10 ]; then
     dkms add -m synosnap -v 0.12.10 2>/dev/null || true
     dkms build -m synosnap -v 0.12.10
@@ -45,6 +47,6 @@ systemctl daemon-reload || true
 echo "abb-agent-arm64-box64 installed."
 echo "Service was not enabled automatically."
 echo "Start it with: sudo systemctl start abb-box64.service"
-echo "Register with: sudo abb-cli -c"
+echo "If the official payload includes abb-cli, register with: sudo abb-cli -c"
 
 exit 0

@@ -116,6 +116,8 @@ else
     die "Official agent package did not contain /opt/Synology/ActiveBackupforBusiness"
 fi
 
+mkdir -p "$PKG_ROOT/opt/synosnap"
+
 SYNOSNAP_SRC="$(find "$SYNOSNAP_ROOT/usr/src" "$AGENT_ROOT/usr/src" -maxdepth 2 -type d -name 'synosnap-*' 2>/dev/null | head -n 1 || true)"
 [ -n "$SYNOSNAP_SRC" ] || die "Could not locate synosnap DKMS source in official rpm packages."
 mkdir -p "$PKG_ROOT/usr/src"
@@ -141,6 +143,7 @@ mkdir -p "$PKG_ROOT/usr/share/doc/$PROJECT_NAME"
 cp -a "$ROOT_DIR/README.md" "$ROOT_DIR/README.zh-CN.md" "$ROOT_DIR/LICENSE" "$ROOT_DIR/NOTICE" "$ROOT_DIR/SECURITY.md" "$PKG_ROOT/usr/share/doc/$PROJECT_NAME/"
 
 chmod 0755 "$PKG_ROOT/usr/local/bin/"*
+chmod 0755 "$PKG_ROOT/opt/synosnap"
 chmod 0644 "$PKG_ROOT/etc/systemd/system/abb-box64.service"
 chmod 0644 "$PKG_ROOT/usr/local/lib/abb-agent-arm64-box64/mount_shim.c" "$PKG_ROOT/usr/local/lib/abb-agent-arm64-box64/mount_shim.map"
 chmod 0755 "$PKG_ROOT/usr/local/lib/abb-agent-arm64-box64/mount_shim.so"
@@ -168,6 +171,6 @@ echo
 echo "Install on a disposable RPM test VM with:"
 echo "  sudo dnf install ./dist/$RPM_NAME"
 echo "  sudo systemctl start abb-box64.service"
-echo "  sudo abb-cli -c"
+echo "  sudo systemctl status abb-box64.service --no-pager"
 echo
 echo "Do not upload dist/*.rpm to GitHub; it contains Synology proprietary files from the official package."

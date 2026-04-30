@@ -115,6 +115,8 @@ else
     die "Official agent package did not contain /opt/Synology/ActiveBackupforBusiness"
 fi
 
+mkdir -p "$PKG_ROOT/opt/synosnap"
+
 SYNOSNAP_SRC="$(find "$SYNOSNAP_ROOT/usr/src" "$AGENT_ROOT/usr/src" -maxdepth 2 -type d -name 'synosnap-*' 2>/dev/null | head -n 1 || true)"
 [ -n "$SYNOSNAP_SRC" ] || die "Could not locate synosnap DKMS source in official packages."
 mkdir -p "$PKG_ROOT/usr/src"
@@ -142,6 +144,7 @@ cp -a "$ROOT_DIR/scripts/install-box64.sh" "$PKG_ROOT/usr/share/doc/$PROJECT_NAM
 
 chmod 0755 "$PKG_ROOT/DEBIAN/postinst" "$PKG_ROOT/DEBIAN/prerm" "$PKG_ROOT/DEBIAN/postrm"
 chmod 0755 "$PKG_ROOT/usr/local/bin/"*
+chmod 0755 "$PKG_ROOT/opt/synosnap"
 chmod 0644 "$PKG_ROOT/etc/systemd/system/abb-box64.service"
 chmod 0644 "$PKG_ROOT/usr/local/lib/abb-agent-arm64-box64/mount_shim.c" "$PKG_ROOT/usr/local/lib/abb-agent-arm64-box64/mount_shim.map"
 chmod 0755 "$PKG_ROOT/usr/local/lib/abb-agent-arm64-box64/mount_shim.so"
@@ -155,6 +158,6 @@ echo "Install with:"
 echo "  sudo dpkg -i dist/$DEB_NAME"
 echo "  sudo apt -f install"
 echo "  sudo systemctl start abb-box64.service"
-echo "  sudo abb-cli -c"
+echo "  sudo systemctl status abb-box64.service --no-pager"
 echo
 echo "Do not upload dist/*.deb to GitHub; it contains Synology proprietary files from the official package."
