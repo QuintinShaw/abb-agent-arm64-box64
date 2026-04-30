@@ -94,13 +94,15 @@ SnapshotHistoryDB: Failed to open database at '/opt/synosnap/snapshot-history-db
 ```bash
 ./scripts/verify-rpm-vm.sh
 ./scripts/verify-rpm-vm.sh --install --rpm dist/abb-agent-arm64-box64-3.2.0-5053.aarch64.rpm
-./scripts/verify-rpm-vm.sh --start-service
+./scripts/verify-rpm-vm.sh --install --start-service --rpm dist/abb-agent-arm64-box64-3.2.0-5053.aarch64.rpm
 ./scripts/verify-rpm-vm.sh --uninstall
 ```
 
 默认模式只读。安装和卸载模式必须显式指定，因为它们会改变系统包、DKMS 状态和 systemd 状态。该验证脚本不会注册 NAS、创建任务或执行备份/恢复测试。
 
-在没有 KVM 的慢速模拟 VM 中，DKMS 可能耗时很长，因为 Synology 的 `synosnap` 构建会先执行大量内核 API feature probe，然后才编译最终模块。TCG-only QEMU 不适合做这类验证。RPM 安装验证更建议使用物理 ARM64 主机或带 KVM 的 ARM64 VM。
+卸载应移除 RPM、DKMS 条目、已加载的 `synosnap` 模块，以及 `/usr/lib/synosnap` 等包拥有的 helper 路径。`/opt/Synology/ActiveBackupforBusiness` 和 `/opt/synosnap` 下的运行数据可能保留；应按测试计划先保留或手动删除。
+
+在没有 KVM 的慢速模拟 VM 中，DKMS 可能耗时很长，因为 Synology 的 `synosnap` 构建会先执行大量内核 API feature probe，然后才编译最终模块，而且 DKMS 可能对每个已安装内核触发 `dracut --regenerate-all`。TCG-only QEMU 不适合做这类验证。RPM 安装验证更建议使用物理 ARM64 主机或带 KVM 的 ARM64 VM。
 
 ## SELinux
 

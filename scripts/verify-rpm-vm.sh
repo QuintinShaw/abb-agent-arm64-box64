@@ -243,7 +243,34 @@ if [ "$DO_UNINSTALL" -eq 1 ]; then
     echo "Uninstall check:"
     run sudo systemctl stop abb-box64.service
     run sudo "$PKG_MANAGER" remove -y abb-agent-arm64-box64
-    rpm -q abb-agent-arm64-box64 || true
-    dkms status synosnap 2>/dev/null || true
+    sudo systemctl reset-failed abb-box64.service 2>/dev/null || true
+
+    if rpm -q abb-agent-arm64-box64 >/dev/null 2>&1; then
+        die "Package is still installed after uninstall."
+    fi
+    echo "OK: package removed."
+
+    if dkms status synosnap 2>/dev/null | grep -q .; then
+        dkms status synosnap 2>/dev/null || true
+        die "DKMS still reports synosnap after uninstall."
+    fi
+    echo "OK: DKMS synosnap entry removed."
+
+    if lsmod | grep -q '^synosnap'; then
+        lsmod | grep '^synosnap' || true
+        die "synosnap module is still loaded after uninstall."
+    fi
+    echo "OK: synosnap module is not loaded."
+
+    if [ -e /usr/lib/synosnap ]; then
+        find /usr/lib/synosnap -maxdepth 2 -print 2>/dev/null || true
+        die "/usr/lib/synosnap still exists after uninstall."
+    fi
+    echo "OK: /usr/lib/synosnap removed."
+
+    if [ -e /opt/Synology/ActiveBackupforBusiness ] || [ -e /opt/synosnap ]; then
+        echo "INFO: runtime data remains under /opt; remove it manually only after preserving any needed logs/state."
+    fi
+
     systemctl status abb-box64.service --no-pager || true
 fi

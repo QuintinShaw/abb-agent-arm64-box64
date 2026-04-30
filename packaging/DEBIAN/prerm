@@ -8,6 +8,7 @@ fi
 pkill -TERM -f synology-backupd 2>/dev/null || true
 sleep 2 || true
 pkill -KILL -f synology-backupd 2>/dev/null || true
+modprobe -r synosnap 2>/dev/null || rmmod synosnap 2>/dev/null || true
 
 if [ "$1" = "remove" ] || [ "$1" = "deconfigure" ]; then
     if command -v dkms >/dev/null 2>&1; then

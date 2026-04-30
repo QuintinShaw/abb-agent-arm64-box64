@@ -121,7 +121,7 @@ The repository also includes a VM-side verifier:
 ```bash
 ./scripts/verify-rpm-vm.sh
 ./scripts/verify-rpm-vm.sh --install --rpm dist/abb-agent-arm64-box64-3.2.0-5053.aarch64.rpm
-./scripts/verify-rpm-vm.sh --start-service
+./scripts/verify-rpm-vm.sh --install --start-service --rpm dist/abb-agent-arm64-box64-3.2.0-5053.aarch64.rpm
 ./scripts/verify-rpm-vm.sh --uninstall
 ```
 
@@ -129,9 +129,15 @@ Default mode is read-only. Install and uninstall modes are explicit because
 they change system packages, DKMS state, and systemd state. The verifier does
 not register to NAS, create tasks, or run backup/restore tests.
 
+Uninstall should remove the RPM, the DKMS entry, the loaded `synosnap` module,
+and package-owned helper paths such as `/usr/lib/synosnap`. Runtime data under
+`/opt/Synology/ActiveBackupforBusiness` and `/opt/synosnap` may remain; preserve
+or remove it manually according to your test plan.
+
 On slow emulated VMs without KVM, DKMS may take a very long time because
 Synology's `synosnap` build runs many kernel API feature probes before compiling
-the final module. This is not a good use of TCG-only QEMU. Prefer a physical
+the final module, and DKMS can trigger `dracut --regenerate-all` for every
+installed kernel. This is not a good use of TCG-only QEMU. Prefer a physical
 ARM64 host or an ARM64 VM with KVM for RPM install validation.
 
 ## SELinux

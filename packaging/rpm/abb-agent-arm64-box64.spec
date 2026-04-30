@@ -87,7 +87,10 @@ echo "If the official payload includes abb-cli, register with: sudo abb-cli -c"
 %preun
 if [ "$1" = "0" ]; then
     systemctl stop abb-box64.service >/dev/null 2>&1 || true
-    pkill -TERM -x synology-backupd >/dev/null 2>&1 || true
+    pkill -TERM -f synology-backupd >/dev/null 2>&1 || true
+    sleep 2 || true
+    pkill -KILL -f synology-backupd >/dev/null 2>&1 || true
+    modprobe -r synosnap >/dev/null 2>&1 || rmmod synosnap >/dev/null 2>&1 || true
     dkms remove -m synosnap -v @SYNOSNAP_VERSION@ --all >/dev/null 2>&1 || true
 fi
 
@@ -99,6 +102,7 @@ systemctl daemon-reload >/dev/null 2>&1 || true
 /opt/Synology/ActiveBackupforBusiness
 /opt/synosnap
 /usr/src/synosnap-@SYNOSNAP_VERSION@
+%dir /usr/lib/synosnap
 /usr/lib/synosnap/libsynosnap.so
 /usr/local/bin/abb-box64-wrapper
 /usr/local/bin/abb-cli
