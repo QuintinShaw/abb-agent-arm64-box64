@@ -40,3 +40,25 @@ Recommended minimum flow:
    ```
 
 Only treat the test as passed when `diff` exits with status 0.
+
+## Clone-Based Restore VM Notes
+
+For disposable validation, you can create a restore VM by copying a tested VM
+disk. This can avoid rebuilding `synosnap` when the copied VM boots the same
+kernel and already contains the matching DKMS-built module.
+
+When using this approach:
+
+- Keep the source VM shut down while copying its disk.
+- Treat the cloned VM as a new disposable validation target.
+- Confirm `modinfo synosnap`, `modprobe synosnap`, and `lsmod | grep synosnap`
+  before starting a restore.
+- Confirm `abb-box64.service` is `enabled` and `active`.
+- Restore into a separate temporary path and compare hashes.
+- Do not treat the clone's first backup as incremental validation. It is the
+  cloned VM's own first backup unless it already has a valid backup chain as
+  that same ABB device.
+
+If the ABB daemon starts before the kernel module is loaded, restart the service
+after loading `synosnap`. The packaged service runs `modprobe synosnap` before
+starting the daemon to reduce this risk.

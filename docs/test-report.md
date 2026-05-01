@@ -181,3 +181,90 @@ This RPM VM run improves confidence in RPM installation and basic
 backup/restore behavior, but it is still not production validation. It did not
 cover bare-metal restore, long-running stress, interrupted backup recovery,
 power-loss recovery, kernel upgrade survival, or uninstall cleanup.
+
+## Debian VM Validation Addendum
+
+Date: 2026-05-01
+
+This addendum summarizes a separate Debian-based VM run. NAS hostnames,
+accounts, tokens, device IDs, certificates, internal domains, and real UUIDs
+are omitted.
+
+Environment:
+
+- Debian 12 ARM64 VM
+- Kernel 6.1.0-44-cloud-arm64
+- Box64 v0.4.2 built locally on a compatible ARM64 Debian/Ubuntu system
+- Synology ABB Agent 3.2.0-5053 x86_64 userspace
+- synosnap 0.12.10 built natively with DKMS on ARM64
+
+Validated checkpoints:
+
+- DEB build on ARM64: PASS
+- DEB install in the Debian VM: PASS
+- Native ARM64 synosnap DKMS compile/load: PASS
+- systemd service start through Box64: PASS
+- Private NAS registration: PASS
+- Entire Device backup from the original Debian VM: PASS
+- Single-file restore into a cloned Debian restore VM with SHA256 verification:
+  PASS
+- First Entire Device backup from the cloned restore VM: PASS
+
+Original Debian VM backup result:
+
+- The NAS task source type was Entire Device.
+- The client created a snapshot for `/`.
+- `/boot/efi` and `/` content were read and uploaded.
+- The task completed successfully.
+- The client status after completion was `Idle - Completed`.
+- The reported protected data size was approximately 4.63 GB.
+- `synosnap` snapshot device use count returned to zero after completion.
+
+Restore VM result:
+
+- A new Debian restore VM was created by copying the original Debian VM disk.
+- The copied VM reused the already built `synosnap.ko` for the same kernel; DKMS
+  was not rebuilt in the restore VM.
+- `modprobe synosnap` succeeded in the restore VM.
+- A single non-sensitive file was restored into a temporary directory.
+- Restored SHA256 matched the pre-restore SHA256:
+
+  ```text
+  caf944063eb6261bc1c1a6a9f0c7b40d3842843044f3bce58824358f425be254
+  ```
+
+- The restore task completed successfully.
+
+Restore VM first-backup result:
+
+- A small marker file was created before the restore VM backup.
+- Its SHA256 was recorded:
+
+  ```text
+  e960d77efe65259fc6b5cce1df904ab651adc89747ad9d334da8e33e212066e0
+  ```
+
+- The restore VM then completed its own first Entire Device backup.
+- The reported protected data size was approximately 4.65 GB.
+- This was the restore VM's first backup, not an incremental backup validation.
+- The marker file SHA256 remained unchanged after the backup.
+- `synosnap` snapshot device use count returned to zero after completion.
+
+Observed caveats:
+
+- On the first boot of the cloned restore VM, `abb-box64.service` started before
+  `synosnap` was loaded and the ABB daemon logged a kernel-driver check error.
+  Loading `synosnap` and restarting the service fixed the check. The packaged
+  service now runs `modprobe synosnap` before starting the daemon.
+- The client log showed `Umount status = -1` during backup cleanup. The final
+  task result and `abb-cli -s` status still reported completion, and `synosnap`
+  use count returned to zero.
+- A cloned VM can carry local snapshot-history state from the source VM. Treat
+  clone-based restore VMs as disposable validation targets, and do not interpret
+  their first backup as an incremental-backup result.
+
+This Debian VM run improves confidence in DEB installation, whole-device
+backup, file restore, and clone-based restore-environment behavior, but it is
+still not production validation. It did not cover bare-metal restore,
+long-running stress, interrupted backup recovery, power-loss recovery, kernel
+upgrade survival, or uninstall cleanup.

@@ -163,3 +163,75 @@ ARM64 主机最初在 NAS 自定义卷列表中显示为空。排查发现：Box
 - 备份结束后 `synosnap` snapshot device use count 回到 0。
 
 这次 RPM VM 验证提高了对 RPM 安装和基础备份/恢复行为的信心，但仍不是生产验证。它没有覆盖裸机恢复、长时间压力、备份中断恢复、断电恢复、内核升级存活或卸载清理。
+
+## Debian VM 验证补充
+
+日期：2026-05-01
+
+本节总结一次独立的 Debian 系 VM 验证。NAS 主机名、账号、token、设备 ID、证书、内网域名和真实 UUID 均已省略。
+
+环境：
+
+- Debian 12 ARM64 VM
+- Kernel 6.1.0-44-cloud-arm64
+- 在兼容的 ARM64 Debian/Ubuntu 系统上本地构建的 Box64 v0.4.2
+- Synology ABB Agent 3.2.0-5053 x86_64 用户态
+- `synosnap` 0.12.10 在 ARM64 上通过 DKMS 原生构建
+
+已验证检查点：
+
+- ARM64 上 DEB 构建：PASS
+- Debian VM 中 DEB 安装：PASS
+- ARM64 原生 `synosnap` DKMS 编译/加载：PASS
+- 通过 Box64 启动 systemd 服务：PASS
+- 注册到私有 NAS：PASS
+- 原 Debian VM 的 Entire Device 整机备份：PASS
+- 在复制出的 Debian restore VM 中完成单文件恢复及 SHA256 校验：PASS
+- 复制出的 restore VM 完成自己的首次 Entire Device 整机备份：PASS
+
+原 Debian VM 备份结果：
+
+- NAS 任务源类型为 Entire Device。
+- 客户端为 `/` 创建 snapshot。
+- `/boot/efi` 和 `/` 内容被读取并上传。
+- 任务成功完成。
+- 完成后客户端状态为 `Idle - Completed`。
+- 报告受保护数据量约 4.63 GB。
+- 备份结束后 `synosnap` snapshot device use count 回到 0。
+
+Restore VM 结果：
+
+- 通过复制原 Debian VM 磁盘创建新的 Debian restore VM。
+- 复制出的 VM 复用了同一内核对应的已构建 `synosnap.ko`；restore VM 中没有重新构建 DKMS。
+- restore VM 中 `modprobe synosnap` 成功。
+- 一个非敏感单文件被恢复到临时目录。
+- 恢复后 SHA256 与恢复前一致：
+
+  ```text
+  caf944063eb6261bc1c1a6a9f0c7b40d3842843044f3bce58824358f425be254
+  ```
+
+- 恢复任务成功完成。
+
+Restore VM 首次备份结果：
+
+- restore VM 备份前创建了一个小型 marker 文件。
+- 记录的 SHA256 为：
+
+  ```text
+  e960d77efe65259fc6b5cce1df904ab651adc89747ad9d334da8e33e212066e0
+  ```
+
+- restore VM 随后完成了它自己的首次 Entire Device 整机备份。
+- 报告受保护数据量约 4.65 GB。
+- 这是 restore VM 的首次备份，不是增量备份验证。
+- 备份后 marker 文件 SHA256 保持不变。
+- 备份结束后 `synosnap` snapshot device use count 回到 0。
+
+观察到的 caveat：
+
+- 复制出的 restore VM 首次启动时，`abb-box64.service` 先于 `synosnap` 加载而启动，ABB daemon 记录了 kernel driver 检查错误。加载 `synosnap` 并重启服务后检查通过。打包的 service 现在会在启动 daemon 前执行 `modprobe synosnap`。
+- 备份清理阶段客户端日志出现 `Umount status = -1`。最终任务结果和 `abb-cli -s` 状态仍报告完成，且 `synosnap` use count 回到 0。
+- 克隆 VM 可能携带源 VM 的本地 snapshot-history 状态。应把基于克隆的 restore VM 视为一次性验证目标，不要把它的首次备份解释为增量备份结果。
+
+这次 Debian VM 验证提高了对 DEB 安装、整机备份、文件恢复和基于克隆的恢复环境行为的信心，但仍不是生产验证。它没有覆盖裸机恢复、长时间压力、备份中断恢复、断电恢复、内核升级存活或卸载清理。

@@ -2,7 +2,8 @@
 
 Run Synology Active Backup for Business Linux x86_64 Agent on ARM64 using native synosnap DKMS + Box64.
 
-Status: Experimental / PoC / Not production ready.
+Status: Core ARM64 VM backup/restore validation completed; still experimental
+and not production ready.
 
 Languages: English | [中文](README.zh-CN.md)
 
@@ -26,7 +27,13 @@ Do not upload:
 
 The build script downloads the official Synology package on your ARM64 machine, or uses a local official zip that you provide with `ABB_OFFICIAL_ZIP`.
 
-## Tested PoC Summary
+## Validation Summary
+
+The project has completed multiple ARM64 VM validation runs covering package
+installation, native `synosnap` DKMS build/load, ABB registration through
+Box64, whole-device backup, file restore, and checksum verification. These
+results validate the core technical path, but they are not a complete
+production-readiness certification.
 
 The minimal PoC was validated on:
 
@@ -57,6 +64,18 @@ Additional RPM VM validation was completed on 2026-04-30:
 - The agent registered to a private NAS test target.
 - An Entire Device backup completed successfully.
 - A single restored file matched the pre-delete MD5 checksum.
+
+Additional Debian VM validation was completed on 2026-05-01:
+
+- Debian 12 ARM64 VM, kernel 6.1.0-44-cloud-arm64.
+- Locally built DEB installed successfully with native ARM64 `synosnap` DKMS.
+- `abb-box64.service` ran the official x86_64 ABB daemon through Box64.
+- The agent registered to a private NAS test target.
+- An Entire Device backup completed successfully.
+- A cloned Debian restore VM reused the compiled `synosnap` module without
+  rebuilding DKMS.
+- A single restored file matched the pre-restore SHA256 checksum.
+- The cloned restore VM then completed its own first Entire Device backup.
 
 This still does not make the project production ready. Bare-metal restore,
 long-running stress, interruption, power-loss, kernel-upgrade, and uninstall

@@ -2,7 +2,7 @@
 
 通过 ARM64 原生 `synosnap` DKMS + Box64，在 ARM64 Linux 上运行 Synology Active Backup for Business Linux x86_64 Agent。
 
-状态：Experimental / PoC / 不适合生产环境。
+状态：已完成 ARM64 VM 核心备份/恢复验证；仍是实验项目，不代表生产就绪。
 
 语言：[English](README.md) | 中文
 
@@ -26,7 +26,11 @@
 
 构建脚本会在你的 ARM64 机器上下载 Synology 官方包，或者使用你通过 `ABB_OFFICIAL_ZIP` / `ABB_OFFICIAL_RPM_ZIP` 提供的本地官方 zip。
 
-## 已测试 PoC 摘要
+## 验证摘要
+
+项目已经完成多轮 ARM64 VM 验证，覆盖软件包安装、ARM64 原生
+`synosnap` DKMS 构建/加载、通过 Box64 注册 ABB、整机备份、文件恢复和
+checksum 校验。这些结果验证了核心技术路径，但不等同于完整生产就绪认证。
 
 最小 PoC 已在以下环境验证：
 
@@ -57,6 +61,17 @@
 - Agent 成功注册到私有 NAS 测试目标。
 - Entire Device 整机备份成功完成。
 - 单文件恢复后 MD5 与删除前一致。
+
+2026-05-01 还完成了一次 Debian VM 验证：
+
+- Debian 12 ARM64 VM，kernel 6.1.0-44-cloud-arm64。
+- 本地构建的 DEB 安装成功，ARM64 原生 `synosnap` DKMS 成功加载。
+- `abb-box64.service` 通过 Box64 运行官方 x86_64 ABB daemon。
+- Agent 成功注册到私有 NAS 测试目标。
+- Entire Device 整机备份成功完成。
+- 复制出的 Debian restore VM 复用了已编译的 `synosnap` 模块，没有重新构建 DKMS。
+- 单文件恢复后 SHA256 与恢复前一致。
+- 复制出的 restore VM 随后完成了它自己的首次 Entire Device 整机备份。
 
 这仍不代表项目已适合生产环境。生产使用前仍必须完成裸机恢复、长时间压力、备份中断、断电、内核升级和卸载清理验证。
 

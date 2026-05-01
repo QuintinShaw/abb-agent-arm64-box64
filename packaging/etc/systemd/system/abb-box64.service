@@ -8,12 +8,13 @@ Type=forking
 User=root
 Group=root
 PIDFile=/run/synology-backupd.pid
+ExecStartPre=/bin/sh -c 'modprobe synosnap'
 ExecStart=/usr/local/bin/abb-box64-wrapper
 ExecStop=/bin/kill -TERM $MAINPID
 KillMode=control-group
 Restart=on-failure
 RestartSec=5
-TimeoutStartSec=30
+TimeoutStartSec=120
 TimeoutStopSec=30
 Environment=BOX64_LOG=0
 
