@@ -1,0 +1,60 @@
+name: Distro validation result
+description: Share a successful or partial validation result for the compatibility matrix.
+title: "[validation]: "
+labels: ["validation", "compatibility"]
+body:
+  - type: input
+    id: distro
+    attributes:
+      label: Distribution
+      description: Example: Debian 12, Ubuntu 22.04, Rocky Linux 9.7.
+    validations:
+      required: true
+  - type: input
+    id: kernel
+    attributes:
+      label: Kernel and architecture
+    validations:
+      required: true
+  - type: dropdown
+    id: package_type
+    attributes:
+      label: Package type
+      options:
+        - DEB
+        - RPM
+    validations:
+      required: true
+  - type: input
+    id: box64
+    attributes:
+      label: Box64 version and install method
+    validations:
+      required: true
+  - type: checkboxes
+    id: validated
+    attributes:
+      label: What passed?
+      options:
+        - label: Package built locally from official Synology input.
+        - label: Package installed.
+        - label: `synosnap` DKMS built.
+        - label: `synosnap` loaded.
+        - label: `abb-box64.service` started.
+        - label: Agent registered to NAS.
+        - label: Backup completed.
+        - label: Restore completed.
+        - label: Restored data matched checksum.
+  - type: textarea
+    id: notes
+    attributes:
+      label: Redacted notes
+      description: Include service, SELinux/AppArmor, DKMS, snapshot cleanup, and restore notes.
+      render: text
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety confirmation
+      options:
+        - label: I did not attach official Synology files, generated packages, credentials, tokens, certificates, private hostnames, or unredacted logs.
+          required: true

@@ -2,7 +2,7 @@
 
 [English](production-test-plan.md) | 中文
 
-本项目仍是实验性质。是否可进入生产，必须在与目标部署一致的硬件和内核上跑完整矩阵后再判断。
+本项目处于 beta 测试阶段。是否用于生产，应在与目标部署一致的硬件和内核上跑完下面的矩阵后再判断。
 
 ## 发布门禁
 
@@ -15,7 +15,7 @@
 - NAS 注册只使用显式限定范围的测试任务。
 - 首次备份、增量备份、中断备份和恢复全部通过。
 - 恢复数据按相对路径比较 SHA256，与源数据一致。
-- 断电或强制重启后没有遗留 stale snapshot device。
+- 断电或强制重启后没有遗留未释放的 snapshot device。
 - 日志不包含 NAS 凭据、token、证书材料或私有主机名。
 
 ## 构建与安装矩阵
@@ -27,7 +27,7 @@
 | 构建命令 | `./scripts/build-deb.sh` | `./scripts/build-rpm.sh` |
 | 包输出 | `dist/*_arm64.deb` | `dist/*.aarch64.rpm` |
 | 构建工具 | `dpkg-deb`, `unzip`, `gcc-x86-64-linux-gnu` | `rpmbuild`, `rpm2cpio`, `cpio`, `gcc-x86-64-linux-gnu` |
-| 内核 headers | `linux-headers-$(uname -r)` | `kernel-devel-$(uname -r)` |
+| 内核头文件 | `linux-headers-$(uname -r)` | `kernel-devel-$(uname -r)` |
 | 运行服务 | systemd | systemd |
 | MAC 策略 | AppArmor 如启用 | SELinux 如 enforcing |
 
@@ -58,23 +58,23 @@ systemctl status abb-box64.service --no-pager || true
 
 | 测试 | 必须结果 |
 | --- | --- |
-| 首次备份 | NAS 显示成功，journal 无 daemon crash |
+| 首次备份 | NAS 显示成功，journal 中没有 daemon crash |
 | 增量备份 | 变更文件被包含，未变更文件仍可恢复 |
 | Hash 恢复 | 恢复文件按相对路径与源文件 SHA256 一致 |
 | 中断备份 | kill daemon 或断网后，下一次备份可成功 |
-| 强制重启 | idle 和 backup 中重启后没有 stale `/dev/synosnap*` |
+| 强制重启 | idle 和 backup 中重启后没有遗留未释放的 `/dev/synosnap*` |
 | NAS 断连 | 临时断网后服务可恢复且无凭据泄漏 |
 | Snapshot 清理 | `sbdctl destroy` 或 daemon 清理测试 snapshot |
 | 卸载 | 软件包移除会停止服务，且不删除用户/NAS 数据 |
 
-只使用临时测试盘、loop 设备或专用 scratch volume。不要用真实生产根文件系统验证。
+只使用临时测试盘、loop 设备或专用临时卷。不要用真实生产根文件系统验证。
 
 ## 内核升级测试
 
 对每个目标发行版：
 
 1. 安装软件包并确认 `synosnap` 已加载。
-2. 升级到新的受支持内核和匹配 headers。
+2. 升级到新的受支持内核和匹配的内核头文件。
 3. 重启。
 4. 确认 DKMS 已重建模块。
 5. 确认 `modprobe synosnap` 成功。
@@ -87,13 +87,13 @@ systemctl status abb-box64.service --no-pager || true
 
 - 官方 rpm zip 布局仍包含 ABB agent rpm 和 synosnap rpm。
 - `rpm2cpio` 解包后文件位于预期路径。
-- 生成的 rpm 拥有 `/opt/Synology/ActiveBackupforBusiness`、`/usr/src/synosnap-0.12.10`、`/usr/lib/synosnap`、wrapper 和 service。
+- 生成的 rpm 拥有 `/opt/Synology/ActiveBackupforBusiness`、`/usr/src/synosnap-0.12.10`、`/usr/lib/synosnap`、封装脚本和 service。
 - `%post` DKMS 构建在已安装 `kernel-devel` 时成功。
 - systemd 能识别 `Type=forking` 和 PID 跟踪。
 - SELinux enforcing 不阻止 Box64、ABB、DKMS、`/dev/synosnap*` 或 ABB 日志/socket 路径。
 - 卸载会移除 DKMS 注册，但不删除 NAS 端状态。
 
-收集 SELinux denial：
+收集 SELinux 拒绝记录：
 
 ```bash
 sudo ausearch -m avc,user_avc -ts recent || true
@@ -112,6 +112,6 @@ sudo journalctl -t setroubleshoot --no-pager || true
 - 已打码的 NAS 任务名。
 - 源和恢复 SHA256 文件。
 - `lsblk`、`findmnt` 和测试卷详情。
-- SELinux/AppArmor denial 如有。
+- SELinux/AppArmor 拒绝记录，如有。
 
 不要发布生成的软件包、Synology 官方包、解包后的 Synology 文件、NAS 凭据、未打码日志或真实磁盘标识。

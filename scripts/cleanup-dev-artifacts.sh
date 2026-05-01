@@ -23,7 +23,7 @@ paths=(
     /tmp/abb-restore-test
 )
 
-echo "This cleanup stops the ABB test daemon and removes known temporary PoC artifacts only."
+echo "This cleanup stops the ABB test daemon and removes known temporary validation artifacts only."
 echo "It does not remove /opt/Synology/ActiveBackupforBusiness, /usr/src/synosnap-0.12.10, or Box64."
 echo
 echo "Loop devices containing abb in their backing file:"

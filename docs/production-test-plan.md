@@ -2,8 +2,8 @@
 
 [English](production-test-plan.md) | [中文](production-test-plan.zh-CN.md)
 
-This project is still experimental. A production decision requires passing the
-matrix below on hardware and kernels that match the intended deployment.
+This project is in beta testing. A production decision should be based on the
+matrix below, run on hardware and kernels that match the intended deployment.
 
 ## Release Gates
 

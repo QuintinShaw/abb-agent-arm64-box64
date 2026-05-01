@@ -1,4 +1,4 @@
-# Public PoC Test Report
+# Public Validation Report
 
 [English](test-report.md) | [中文](test-report.zh-CN.md)
 
@@ -18,7 +18,7 @@ certificates, internal domains, and real disk UUIDs are omitted.
 
 ## Summary
 
-The PoC completed a minimal safe loop:
+The initial ARM64 host validation completed a safe custom-volume loop:
 
 ```text
 ARM64 native synosnap DKMS
@@ -35,7 +35,7 @@ ARM64 native synosnap DKMS
 - CP1 synosnap ARM64 DKMS compile/load: PASS
 - CP2 Box64 starts x86_64 ABB tools: PASS
 - CP3 x86_64 `sbdctl` under Box64 reaches ARM64 synosnap ioctl path: PASS
-- CP4 daemon/systemd lifecycle for PoC: PASS with caveats
+- CP4 daemon/systemd lifecycle: PASS with notes
 - CP5 safe NAS custom-volume registration: PASS
 - CP5A first test backup: PASS
 - CP5B incremental backup: PASS
@@ -63,7 +63,7 @@ found that x86_64 libmount under Box64 opened and read mount files but returned
 zero entries to ABB.
 
 A small x86_64 preload shim implementing the libmount functions ABB used during
-volume enumeration fixed the custom-volume list for the PoC.
+volume enumeration fixed the custom-volume list during validation.
 
 ## Safe Test Volume
 
@@ -99,14 +99,16 @@ files were compared against the post-incremental source hashes.
 
 Result: all sha256 hashes matched.
 
-## Production Readiness
+## Beta Scope
 
-Not production ready.
+The project is in beta testing. The runs below validate the core ARM64 path,
+but deployment decisions should still be based on a target-environment test
+plan.
 
-Known risks:
+Remaining validation work:
 
-- The PoC currently depends on a compatibility mount shim.
-- systemd supervision still has daemonization caveats.
+- The project currently depends on a compatibility mount shim.
+- systemd supervision still has daemonization notes to track.
 - The test used a small temporary volume, not a real production workload.
 - No long-duration stress test was performed.
 - No power-loss or interrupted-backup recovery test was performed.
@@ -169,7 +171,7 @@ Restore result:
   41aa574c771a8671fe089b83ba890a5c
   ```
 
-Observed caveats:
+Observed notes:
 
 - The log showed two post-completion lines similar to
   `Failed to transition snpashot`.
@@ -178,9 +180,9 @@ Observed caveats:
 - `synosnap` snapshot device use count returned to zero after the backup.
 
 This RPM VM run improves confidence in RPM installation and basic
-backup/restore behavior, but it is still not production validation. It did not
-cover bare-metal restore, long-running stress, interrupted backup recovery,
-power-loss recovery, kernel upgrade survival, or uninstall cleanup.
+backup/restore behavior. It should be combined with target-environment checks
+for bare-metal restore, long-running stress, interrupted backup recovery,
+power-loss recovery, kernel upgrade survival, and uninstall cleanup.
 
 ## Debian VM Validation Addendum
 
@@ -250,7 +252,7 @@ Restore VM first-backup result:
 - The marker file SHA256 remained unchanged after the backup.
 - `synosnap` snapshot device use count returned to zero after completion.
 
-Observed caveats:
+Observed notes:
 
 - On the first boot of the cloned restore VM, `abb-box64.service` started before
   `synosnap` was loaded and the ABB daemon logged a kernel-driver check error.
@@ -264,7 +266,7 @@ Observed caveats:
   their first backup as an incremental-backup result.
 
 This Debian VM run improves confidence in DEB installation, whole-device
-backup, file restore, and clone-based restore-environment behavior, but it is
-still not production validation. It did not cover bare-metal restore,
-long-running stress, interrupted backup recovery, power-loss recovery, kernel
-upgrade survival, or uninstall cleanup.
+backup, file restore, and clone-based restore-environment behavior. It should
+be combined with target-environment checks for bare-metal restore, long-running
+stress, interrupted backup recovery, power-loss recovery, kernel upgrade
+survival, and uninstall cleanup.

@@ -30,4 +30,4 @@ sudo rm -f /tmp/abb-testdisk.img
 sudo rmdir /mnt/abb-loop-test
 ```
 
-取决于 ABB/NAS 行为，loop 设备可能不会显示为自定义卷。PoC 中 loop 设备不足时使用了临时 SCSI debug disk。
+取决于 ABB/NAS 行为，loop 设备可能不会显示为自定义卷。此前验证中，loop 设备不足时改用了临时 SCSI debug disk。

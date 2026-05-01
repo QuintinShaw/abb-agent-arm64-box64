@@ -2,9 +2,9 @@
 
 [English](README.md) | [中文](README.zh-CN.md)
 
-Containers are useful for package assembly checks, but they are not sufficient
-for production validation. `synosnap` is a kernel module, and backup behavior
-depends on real block devices, systemd, NAS connectivity, and restore testing.
+Containers are useful for package assembly checks, but they do not replace VM
+or host validation. `synosnap` is a kernel module, and backup behavior depends
+on real block devices, systemd, NAS connectivity, and restore testing.
 
 Use containers for:
 

@@ -1,0 +1,61 @@
+name: Install failure
+description: Report a DEB/RPM install, DKMS, Box64, or service startup failure.
+title: "[install]: "
+labels: ["install", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not attach official Synology packages, generated packages, extracted Synology files, credentials, tokens, certificates, private hostnames, or unredacted logs.
+  - type: input
+    id: distro
+    attributes:
+      label: Distribution
+      description: Example: Debian 12, Ubuntu 24.04, Rocky Linux 9.7.
+    validations:
+      required: true
+  - type: input
+    id: kernel
+    attributes:
+      label: Kernel and architecture
+      description: Output of `uname -a` with private hostnames redacted.
+    validations:
+      required: true
+  - type: dropdown
+    id: package_type
+    attributes:
+      label: Package type
+      options:
+        - DEB
+        - RPM
+        - Source/script step before package install
+    validations:
+      required: true
+  - type: textarea
+    id: command
+    attributes:
+      label: Command that failed
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: preflight
+    attributes:
+      label: Redacted preflight output
+      description: Run `./scripts/preflight-check.sh` and redact sensitive fields before pasting.
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Redacted logs
+      description: Include relevant `journalctl -u abb-box64.service` or package-manager output.
+      render: text
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety confirmation
+      options:
+        - label: I did not attach Synology binaries, generated packages, credentials, tokens, certificates, private hostnames, or unredacted logs.
+          required: true

@@ -2,18 +2,48 @@
 
 Run Synology Active Backup for Business Linux x86_64 Agent on ARM64 using native synosnap DKMS + Box64.
 
-Status: Core ARM64 VM backup/restore validation completed; still experimental
-and not production ready.
+Status: Beta testing. Core ARM64 VM backup/restore validation has passed.
 
 Languages: English | [中文](README.zh-CN.md)
 
 This repository does not contain or redistribute Synology binaries.
 
-## Risk Statement
+| Area | Status |
+| --- | --- |
+| DEB packaging | Beta, validated on ARM64 Debian/Ubuntu-style systems |
+| RPM packaging | Beta, validated on Rocky Linux 9.7 ARM64 VM |
+| Backup/restore | Whole-device and file-restore validation completed in ARM64 VMs |
+| Releases | Source-only; no Synology binaries or generated packages |
 
-This project is unofficial, unsupported by Synology, and intended only for learning, research, and interoperability experiments. Backup software must be validated by restore tests before it is trusted. You are responsible for your data, NAS, server, kernel, and recovery plan.
+## Beta Notice
 
-Do not use this in production unless you have completed your own production test plan covering full restore validation, long-running stress tests, interrupted-backup tests, power-loss recovery tests, kernel upgrade tests, package uninstall cleanup, SELinux/AppArmor behavior, and bare-metal recovery tests. See [docs/production-test-plan.md](docs/production-test-plan.md).
+This project is unofficial and unsupported by Synology. It has entered beta
+testing after completing core ARM64 VM backup/restore validation. You can try
+installing it on compatible ARM64 Linux systems; if you hit issues, please open
+a GitHub issue with redacted logs, distro/kernel details, package type, and
+reproduction steps.
+
+Backup software must still be validated in your own environment before you rely
+on it for important data. Keep an independent recovery path and run your own
+restore tests. See [docs/production-test-plan.md](docs/production-test-plan.md).
+
+## Quickstart
+
+For the lowest-friction trial on a compatible ARM64 Linux system:
+
+```bash
+git clone https://github.com/QuintinShaw/abb-agent-arm64-box64.git
+cd abb-agent-arm64-box64
+./scripts/quickstart.sh --yes
+sudo abb-cli -c
+```
+
+The quickstart script installs prerequisites, builds a local package from
+Synology's official package input, installs it, enables `abb-box64.service`, and
+runs a read-only preflight check. It does not redistribute Synology binaries.
+
+See [docs/quickstart.md](docs/quickstart.md), [docs/preflight.md](docs/preflight.md),
+and [docs/compatibility-matrix.md](docs/compatibility-matrix.md).
 
 ## What This Repository Does Not Contain
 
@@ -21,72 +51,30 @@ This repository does not distribute Synology proprietary binaries.
 
 Do not upload:
 
-- Official Synology zip or deb files
-- Generated deb packages containing Synology binaries
+- Official Synology zip, deb, or rpm files
+- Generated deb/rpm packages containing Synology binaries
 - NAS credentials, certificates, tokens, or unredacted logs
 
-The build script downloads the official Synology package on your ARM64 machine, or uses a local official zip that you provide with `ABB_OFFICIAL_ZIP`.
+The build script downloads the official Synology package on your ARM64 machine,
+or uses a local official zip that you provide with `ABB_OFFICIAL_ZIP` or
+`ABB_OFFICIAL_RPM_ZIP`.
 
 ## Validation Summary
 
-The project has completed multiple ARM64 VM validation runs covering package
-installation, native `synosnap` DKMS build/load, ABB registration through
-Box64, whole-device backup, file restore, and checksum verification. These
-results validate the core technical path, but they are not a complete
-production-readiness certification.
+Core ARM64 VM validation has been completed across Debian/Ubuntu-style DEB
+packaging, RPM packaging, native ARM64 `synosnap` DKMS, Box64-based ABB
+userspace, whole-device backup, file restore, and checksum verification.
 
-The minimal PoC was validated on:
-
-- Ubuntu 22.04.4 LTS
-- ARM64 / aarch64
-- Kernel 5.15.0-113-generic
-- Box64 v0.4.2
-- Synology ABB Agent 3.2.0-5053
-- synosnap 0.12.10 built natively with DKMS on ARM64
-
-Validated checkpoints:
-
-- Box64 runs x86_64 ABB userspace tools.
-- ARM64 native synosnap DKMS loads.
-- x86_64 `sbdctl` under Box64 can create and destroy `/dev/synosnap0`.
-- ABB daemon connects to NAS.
-- A safe custom-volume task for `/mnt/abb-scsi-test` completed first backup.
-- A second backup used CBT/incremental mode and transferred about 8.5 MB.
-- Restore to `/tmp/abb-restore-test` matched source sha256 hashes.
-
-See [docs/test-report.md](docs/test-report.md).
-
-Additional RPM VM validation was completed on 2026-04-30:
-
-- Rocky Linux 9.7 ARM64 VM, kernel 5.14.0-611.49.1.el9_7.aarch64, SELinux Enforcing.
-- Locally built RPM installed successfully with native ARM64 `synosnap` DKMS.
-- `abb-box64.service` ran the official x86_64 ABB daemon through Box64.
-- The agent registered to a private NAS test target.
-- An Entire Device backup completed successfully.
-- A single restored file matched the pre-delete MD5 checksum.
-
-Additional Debian VM validation was completed on 2026-05-01:
-
-- Debian 12 ARM64 VM, kernel 6.1.0-44-cloud-arm64.
-- Locally built DEB installed successfully with native ARM64 `synosnap` DKMS.
-- `abb-box64.service` ran the official x86_64 ABB daemon through Box64.
-- The agent registered to a private NAS test target.
-- An Entire Device backup completed successfully.
-- A cloned Debian restore VM reused the compiled `synosnap` module without
-  rebuilding DKMS.
-- A single restored file matched the pre-restore SHA256 checksum.
-- The cloned restore VM then completed its own first Entire Device backup.
-
-This still does not make the project production ready. Bare-metal restore,
-long-running stress, interruption, power-loss, kernel-upgrade, and uninstall
-cleanup validation remain required before any production use.
+Detailed results are documented in [docs/test-report.md](docs/test-report.md).
 
 ## Install Deb On Debian/Ubuntu
+
+Manual DEB path:
 
 ```bash
 sudo apt update
 sudo apt install -y git dkms build-essential "linux-headers-$(uname -r)" kmod systemd unzip wget dpkg-dev gcc-x86-64-linux-gnu
-git clone https://github.com/<your-name>/abb-agent-arm64-box64.git
+git clone https://github.com/QuintinShaw/abb-agent-arm64-box64.git
 cd abb-agent-arm64-box64
 sudo ./scripts/install-box64.sh
 ./scripts/build-deb.sh
@@ -130,7 +118,7 @@ This generated package is for your own local machine. Do not publish it to GitHu
 
 ## Build RPM On RPM-Based Systems
 
-RPM support is experimental and should be tested in a disposable ARM64 RPM VM or spare host:
+RPM support is beta-stage and should be tested in a disposable ARM64 RPM VM or spare host:
 
 Before installing the generated RPM, install a distro-compatible Box64, DKMS
 from EPEL or another trusted source, matching `kernel-devel-$(uname -r)`, and
@@ -156,9 +144,25 @@ builder relocates that official binary into the local ABB payload so the
 `/usr/local/bin/abb-cli` wrapper works through Box64. Do not redistribute that
 binary or any generated package containing it.
 
+## Feedback
+
+Use GitHub issues for reproducible install, backup, restore, and distro
+validation reports. Use GitHub Discussions for setup questions and successful
+validation notes. Redact logs before sharing them.
+
+Helpful links:
+
+- [CONTRIBUTING.md](CONTRIBUTING.md)
+- [ROADMAP.md](ROADMAP.md)
+- [docs/compatibility-matrix.md](docs/compatibility-matrix.md)
+- [docs/test-report.md](docs/test-report.md)
+- [SECURITY.md](SECURITY.md)
+
 ## Release Policy
 
-Source-only releases are allowed. Do not attach generated `.deb` files, official Synology zip/deb files, extracted Synology files, NAS logs, or credentials to GitHub Releases.
+Source-only releases are allowed. Do not attach generated `.deb` / `.rpm`
+files, official Synology zip/deb/rpm files, extracted Synology files, NAS logs,
+or credentials to GitHub Releases.
 
 ## Verify
 
@@ -188,13 +192,13 @@ Production-oriented validation should also cover interrupted backups, forced reb
 
 ## Compatibility Shim
 
-During the PoC, x86_64 libmount under Box64 returned an empty mount table even though it opened and read `/proc/self/mountinfo`. This made the NAS custom-volume list empty. This repository includes a small x86_64 preload shim for the libmount functions ABB uses for mount enumeration. It is built locally with `x86_64-linux-gnu-gcc` during packaging and installed under:
+During validation, x86_64 libmount under Box64 returned an empty mount table even though it opened and read `/proc/self/mountinfo`. This made the NAS custom-volume list empty. This repository includes a small x86_64 preload shim for the libmount functions ABB uses for mount enumeration. It is built locally with `x86_64-linux-gnu-gcc` during packaging and installed under:
 
 ```text
 /usr/local/lib/abb-agent-arm64-box64/mount_shim.so
 ```
 
-The wrapper loads it through `BOX64_LD_PRELOAD` when present. This is a compatibility workaround and one of the reasons this project is not production-ready.
+The wrapper loads it through `BOX64_LD_PRELOAD` when present. This is a beta-stage compatibility workaround.
 
 ## Legal Notes
 

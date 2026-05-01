@@ -25,12 +25,12 @@ ABB x86_64 userspace
   -> /dev/synosnap*
 ```
 
-The key PoC result is that private snapshot ioctl calls from x86_64 ABB
+The key validation result is that private snapshot ioctl calls from x86_64 ABB
 userspace under Box64 reached the native ARM64 `synosnap` kernel module.
 
 ## Why Box64
 
-The PoC found Box64 materially better than QEMU for this workload. Box64 could
+Validation found Box64 materially better than QEMU for this workload. Box64 could
 run ABB tools and pass the private ioctl path needed by `sbdctl` and the ABB
 daemon.
 
@@ -49,6 +49,6 @@ The package builds and installs an x86_64 preload shim:
 ```
 
 The wrapper loads this shim with `BOX64_LD_PRELOAD` when present. It implements
-only the subset of libmount symbols ABB used during the PoC.
+only the subset of libmount symbols ABB used during validation.
 
 This is a compatibility workaround, not a general libmount replacement.

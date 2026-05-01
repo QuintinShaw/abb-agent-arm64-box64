@@ -48,7 +48,7 @@ sudo systemctl enable --now abb-box64.service
 sudo systemctl status abb-box64.service --no-pager
 ```
 
-官方 RPM payload 将 `abb-cli` 放在 `/bin/abb-cli`；本构建器会把它重新放入本地 ABB payload，使 wrapper 可以通过 Box64 运行它。
+官方 RPM 内容将 `abb-cli` 放在 `/bin/abb-cli`；本构建器会把它重新放入本地 ABB 文件树，使封装脚本可以通过 Box64 运行它。
 
 也可以运行仓库内验证脚本：
 
@@ -58,7 +58,7 @@ sudo systemctl status abb-box64.service --no-pager
 ./scripts/verify-rpm-vm.sh --enable-service
 ```
 
-第一条命令只读。安装命令会检查 rpm 元数据，通过 `dnf` 或 `yum` 安装包，检查 DKMS 状态、内核模块、systemd 状态，并收集最近 journal 和 SELinux denial。它不会把主机注册到 NAS，也不会启动备份。
+第一条命令只读。安装命令会检查 rpm 元数据，通过 `dnf` 或 `yum` 安装包，检查 DKMS 状态、内核模块、systemd 状态，并收集最近 journal 和 SELinux 拒绝记录。它不会把主机注册到 NAS，也不会启动备份。
 
 成功的服务 smoke test 应在 service journal 中看到 `ABB backup service starts`，随后看到 kernel driver 检查。该包会创建 `/opt/synosnap`，供 ABB 保存 snapshot history 数据库；如果该目录缺失，服务可能在日志中输出 `SnapshotHistoryDB: Failed to open database` 后退出。
 

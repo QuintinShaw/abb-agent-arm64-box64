@@ -2,17 +2,48 @@
 
 通过 ARM64 原生 `synosnap` DKMS + Box64，在 ARM64 Linux 上运行 Synology Active Backup for Business Linux x86_64 Agent。
 
-状态：已完成 ARM64 VM 核心备份/恢复验证；仍是实验项目，不代表生产就绪。
+状态：Beta 测试阶段。ARM64 VM 核心备份/恢复验证已通过。
 
 语言：[English](README.md) | 中文
 
-本仓库不包含、也不再分发 Synology 二进制文件。
+本仓库不包含、也不分发 Synology 二进制文件。
 
-## 风险声明
+| 项目 | 状态 |
+| --- | --- |
+| DEB 打包 | Beta，已在 ARM64 Debian/Ubuntu 风格系统验证 |
+| RPM 打包 | Beta，已在 Rocky Linux 9.7 ARM64 VM 验证 |
+| 备份/恢复 | 已在 ARM64 VM 完成整机备份和文件恢复验证 |
+| Release | 只发布源码；不发布 Synology 二进制文件或生成包 |
 
-本项目不是 Synology 官方项目，不受 Synology 支持，仅用于学习、研究和兼容性实验。备份软件必须通过恢复测试验证后才能被信任。你需要自行承担数据、NAS、服务器、内核和恢复方案风险。
+## Beta 说明
 
-除非你已经完成自己的生产测试计划，包括完整恢复验证、长时间压力测试、备份中断测试、断电恢复测试、内核升级测试、软件包卸载清理、SELinux/AppArmor 行为验证和裸机恢复测试，否则不要用于生产环境。详见 [docs/production-test-plan.zh-CN.md](docs/production-test-plan.zh-CN.md)。
+本项目不是 Synology 官方项目，不受 Synology 支持。项目已完成核心 ARM64
+VM 备份/恢复验证，并进入 beta 测试阶段。你可以在兼容的 ARM64 Linux 系统上
+尝试安装；如果遇到问题，请在 GitHub issue 中提供已打码日志、发行版/内核、
+软件包类型和复现步骤。
+
+备份软件仍必须在你自己的环境中完成恢复验证后再承载重要数据。请保留独立
+恢复路径，并执行你自己的恢复测试。详见
+[docs/production-test-plan.zh-CN.md](docs/production-test-plan.zh-CN.md)。
+
+## 快速开始
+
+在兼容的 ARM64 Linux 系统上，最低门槛的试用路径：
+
+```bash
+git clone https://github.com/QuintinShaw/abb-agent-arm64-box64.git
+cd abb-agent-arm64-box64
+./scripts/quickstart.sh --yes
+sudo abb-cli -c
+```
+
+快速安装脚本会安装前置依赖，从 Synology 官方包输入构建本地软件包，安装该
+软件包，启用 `abb-box64.service`，并运行只读预检。它不会重新分发 Synology
+二进制文件。
+
+详见 [docs/quickstart.zh-CN.md](docs/quickstart.zh-CN.md)、
+[docs/preflight.zh-CN.md](docs/preflight.zh-CN.md) 和
+[docs/compatibility-matrix.zh-CN.md](docs/compatibility-matrix.zh-CN.md)。
 
 ## 本仓库不包含什么
 
@@ -28,59 +59,20 @@
 
 ## 验证摘要
 
-项目已经完成多轮 ARM64 VM 验证，覆盖软件包安装、ARM64 原生
-`synosnap` DKMS 构建/加载、通过 Box64 注册 ABB、整机备份、文件恢复和
-checksum 校验。这些结果验证了核心技术路径，但不等同于完整生产就绪认证。
+项目已经完成 ARM64 VM 核心验证，覆盖 Debian/Ubuntu 风格 DEB 打包、RPM
+打包、ARM64 原生 `synosnap` DKMS、基于 Box64 的 ABB 用户态、整机备份、
+文件恢复和校验和比对。
 
-最小 PoC 已在以下环境验证：
-
-- Ubuntu 22.04.4 LTS
-- ARM64 / aarch64
-- Kernel 5.15.0-113-generic
-- Box64 v0.4.2
-- Synology ABB Agent 3.2.0-5053
-- `synosnap` 0.12.10 在 ARM64 上通过 DKMS 原生构建
-
-已验证检查点：
-
-- Box64 可运行 x86_64 ABB 用户态工具。
-- ARM64 原生 `synosnap` DKMS 可加载。
-- x86_64 `sbdctl` 经 Box64 可创建和销毁 `/dev/synosnap0`。
-- ABB daemon 可连接 NAS。
-- 面向 `/mnt/abb-scsi-test` 的安全自定义卷任务完成首次备份。
-- 第二次备份使用 CBT/增量路径，传输约 8.5 MB。
-- 恢复到 `/tmp/abb-restore-test` 后，源数据和恢复数据 sha256 一致。
-
-详见 [docs/test-report.zh-CN.md](docs/test-report.zh-CN.md)。
-
-2026-04-30 还完成了一次 RPM VM 验证：
-
-- Rocky Linux 9.7 ARM64 VM，kernel 5.14.0-611.49.1.el9_7.aarch64，SELinux Enforcing。
-- 本地构建的 RPM 安装成功，ARM64 原生 `synosnap` DKMS 成功加载。
-- `abb-box64.service` 通过 Box64 运行官方 x86_64 ABB daemon。
-- Agent 成功注册到私有 NAS 测试目标。
-- Entire Device 整机备份成功完成。
-- 单文件恢复后 MD5 与删除前一致。
-
-2026-05-01 还完成了一次 Debian VM 验证：
-
-- Debian 12 ARM64 VM，kernel 6.1.0-44-cloud-arm64。
-- 本地构建的 DEB 安装成功，ARM64 原生 `synosnap` DKMS 成功加载。
-- `abb-box64.service` 通过 Box64 运行官方 x86_64 ABB daemon。
-- Agent 成功注册到私有 NAS 测试目标。
-- Entire Device 整机备份成功完成。
-- 复制出的 Debian restore VM 复用了已编译的 `synosnap` 模块，没有重新构建 DKMS。
-- 单文件恢复后 SHA256 与恢复前一致。
-- 复制出的 restore VM 随后完成了它自己的首次 Entire Device 整机备份。
-
-这仍不代表项目已适合生产环境。生产使用前仍必须完成裸机恢复、长时间压力、备份中断、断电、内核升级和卸载清理验证。
+详细结果见 [docs/test-report.zh-CN.md](docs/test-report.zh-CN.md)。
 
 ## 在 Debian/Ubuntu 上安装 deb
+
+手动 DEB 路径：
 
 ```bash
 sudo apt update
 sudo apt install -y git dkms build-essential "linux-headers-$(uname -r)" kmod systemd unzip wget dpkg-dev gcc-x86-64-linux-gnu
-git clone https://github.com/<your-name>/abb-agent-arm64-box64.git
+git clone https://github.com/QuintinShaw/abb-agent-arm64-box64.git
 cd abb-agent-arm64-box64
 sudo ./scripts/install-box64.sh
 ./scripts/build-deb.sh
@@ -124,7 +116,7 @@ dist/abb-agent-arm64-box64_3.2.0-5053_arm64.deb
 
 ## 在 RPM 系统上构建 rpm
 
-RPM 支持是实验性的，应在一次性 ARM64 RPM 虚拟机或备用主机上测试：
+RPM 支持处于 beta 阶段，应在一次性 ARM64 RPM 虚拟机或备用主机上测试：
 
 安装生成的 RPM 前，请先安装与发行版兼容的 Box64、来自 EPEL 或其他可信来源的 DKMS、当前运行内核对应的 `kernel-devel-$(uname -r)`，以及 Box64 所需的 x86_64 运行库。Rocky/RHEL 注意事项见 [docs/rpm.zh-CN.md](docs/rpm.zh-CN.md)。
 
@@ -142,7 +134,19 @@ ABB_OFFICIAL_RPM_ZIP=/path/to/official-rpm.zip ABB_OFFICIAL_RPM_SHA256=<sha256> 
 ```
 
 详见 [docs/rpm.zh-CN.md](docs/rpm.zh-CN.md)。RPM 兼容需要分别验证 `kernel-devel`、DKMS、systemd、SELinux 和官方 rpm 包文件布局。
-Synology 官方 RPM archive 将 `abb-cli` 放在 `/bin/abb-cli`；本构建器会把这个官方二进制重新放入本地 ABB payload，让 `/usr/local/bin/abb-cli` wrapper 可通过 Box64 工作。不要重新分发该二进制文件，也不要重新分发包含它的生成包。
+Synology 官方 RPM 压缩包将 `abb-cli` 放在 `/bin/abb-cli`；本构建器会把这个官方二进制重新放入本地 ABB 文件树，让 `/usr/local/bin/abb-cli` 封装脚本可通过 Box64 工作。不要重新分发该二进制文件，也不要重新分发包含它的生成包。
+
+## 反馈
+
+可复现的安装、备份、恢复和发行版验证结果请提交 GitHub issue。安装讨论、成功验证记录和开放问题可以放到 GitHub Discussions。分享日志前请先打码。
+
+有用链接：
+
+- [CONTRIBUTING.zh-CN.md](CONTRIBUTING.zh-CN.md)
+- [ROADMAP.zh-CN.md](ROADMAP.zh-CN.md)
+- [docs/compatibility-matrix.zh-CN.md](docs/compatibility-matrix.zh-CN.md)
+- [docs/test-report.zh-CN.md](docs/test-report.zh-CN.md)
+- [SECURITY.zh-CN.md](SECURITY.zh-CN.md)
 
 ## 发布规则
 
@@ -168,7 +172,7 @@ abb-cli -s
 4. 执行首次备份。
 5. 修改测试数据并执行增量备份。
 6. 恢复到另一个临时路径。
-7. 按相对路径比较恢复文件 hash 和源文件 hash。
+7. 按相对路径比较恢复文件和源文件的校验和。
 
 详见 [docs/restore-validation.zh-CN.md](docs/restore-validation.zh-CN.md) 和 [examples/abb-test-loop-device.zh-CN.md](examples/abb-test-loop-device.zh-CN.md)。
 
@@ -176,13 +180,13 @@ abb-cli -s
 
 ## 兼容性 Shim
 
-PoC 中发现，Box64 下的 x86_64 `libmount.so.1` 即使能打开并读取 `/proc/self/mountinfo`，仍会返回空 mount table，导致 NAS 自定义卷列表为空。本仓库包含一个小型 x86_64 preload shim，实现 ABB 挂载点枚举所需的 libmount 函数子集。它会在打包时由 `x86_64-linux-gnu-gcc` 本地构建，并安装到：
+验证期间发现，Box64 下的 x86_64 `libmount.so.1` 即使能打开并读取 `/proc/self/mountinfo`，仍会返回空 mount table，导致 NAS 自定义卷列表为空。本仓库包含一个小型 x86_64 preload shim，实现 ABB 挂载点枚举所需的 libmount 函数子集。它会在打包时由 `x86_64-linux-gnu-gcc` 本地构建，并安装到：
 
 ```text
 /usr/local/lib/abb-agent-arm64-box64/mount_shim.so
 ```
 
-wrapper 会在该文件存在时通过 `BOX64_LD_PRELOAD` 加载它。这只是兼容性 workaround，也是本项目不适合生产环境的原因之一。
+封装脚本会在该文件存在时通过 `BOX64_LD_PRELOAD` 加载它。这是 beta 阶段的兼容性变通方案。
 
 ## 法律说明
 

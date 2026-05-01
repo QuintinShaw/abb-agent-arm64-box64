@@ -37,7 +37,8 @@ with `sudo dpkg -i` after the build completes.
 
 The default official zip is verified with the SHA256 pinned in the script. When
 using `ABB_OFFICIAL_ZIP`, provide `ABB_OFFICIAL_SHA256` unless you are doing a
-disposable local experiment and explicitly set `ABB_ALLOW_UNVERIFIED_ZIP=1`.
+disposable local validation run and explicitly set
+`ABB_ALLOW_UNVERIFIED_ZIP=1`.
 
 Expected output:
 

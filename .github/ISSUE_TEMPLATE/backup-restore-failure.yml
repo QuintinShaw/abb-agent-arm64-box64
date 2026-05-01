@@ -1,0 +1,65 @@
+name: Backup or restore failure
+description: Report NAS registration, backup, restore, checksum, or snapshot cleanup failures.
+title: "[backup/restore]: "
+labels: ["backup-restore", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Share only redacted logs. Do not include NAS credentials, tokens, private hostnames, certificates, generated packages, or official Synology binaries.
+  - type: input
+    id: distro
+    attributes:
+      label: Distribution
+    validations:
+      required: true
+  - type: input
+    id: kernel
+    attributes:
+      label: Kernel and architecture
+    validations:
+      required: true
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Task scope
+      options:
+        - Custom volume
+        - Entire Device
+        - File restore only
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: status
+    attributes:
+      label: ABB status
+      description: Redacted output of `abb-cli -s`, service status, and relevant NAS task result.
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: checksum
+    attributes:
+      label: Restore checksum result
+      description: Include the command used and redacted output. Use SHA256 when possible.
+      render: text
+  - type: textarea
+    id: logs
+    attributes:
+      label: Redacted logs
+      description: Include only the relevant service or ABB log lines.
+      render: text
+  - type: textarea
+    id: snapshot_cleanup
+    attributes:
+      label: Snapshot cleanup state
+      description: Output of `lsmod | grep synosnap`, `/dev/synosnap*`, or `abb-cli -s` after the run.
+      render: text
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety confirmation
+      options:
+        - label: I tested with a scope I can safely restore and did not share sensitive data.
+          required: true

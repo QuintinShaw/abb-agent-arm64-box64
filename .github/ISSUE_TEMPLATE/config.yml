@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security, legal, or infringement report
+    url: mailto:github@xyt.email
+    about: Do not open public issues containing credentials, tokens, certificates, or legal claims.
+  - name: General questions and validation notes
+    url: https://github.com/QuintinShaw/abb-agent-arm64-box64/discussions
+    about: Use Discussions for open-ended setup questions and successful validation reports.

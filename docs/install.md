@@ -2,6 +2,15 @@
 
 [English](install.md) | [中文](install.zh-CN.md)
 
+For the fastest first trial, use the quickstart path:
+
+```bash
+./scripts/quickstart.sh --yes
+sudo abb-cli -c
+```
+
+See [quickstart.md](quickstart.md) for options and RPM notes.
+
 Build the local deb first:
 
 ```bash

@@ -31,7 +31,7 @@ ABB_OFFICIAL_ZIP=/path/to/Synology-ABB-Agent-x64-deb.zip ABB_OFFICIAL_SHA256=<sh
 
 `build-deb.sh` 必须以非特权用户运行。脚本默认拒绝 root，因为它会下载并解包外部包。构建完成后再用 `sudo dpkg -i` 安装生成的 deb。
 
-默认官方 zip 会用脚本内置 SHA256 校验。使用 `ABB_OFFICIAL_ZIP` 时应提供 `ABB_OFFICIAL_SHA256`，除非是在一次性本地实验中显式设置 `ABB_ALLOW_UNVERIFIED_ZIP=1`。
+默认官方 zip 会用脚本内置 SHA256 校验。使用 `ABB_OFFICIAL_ZIP` 时应提供 `ABB_OFFICIAL_SHA256`；只有一次性本地验证才建议显式设置 `ABB_ALLOW_UNVERIFIED_ZIP=1`。
 
 预期输出：
 

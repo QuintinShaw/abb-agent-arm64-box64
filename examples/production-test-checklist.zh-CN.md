@@ -63,7 +63,7 @@ find /mnt/abb-test/data -type f -exec sha256sum {} \; | sort > /tmp/source.initi
 
 - NAS 报告成功。
 - `journalctl -u abb-box64.service` 无 daemon crash。
-- 完成后没有 stale `/dev/synosnap*`，除非 ABB 仍拥有它。
+- 完成后没有遗留未释放的 `/dev/synosnap*`，除非 ABB 仍拥有它。
 
 ## 增量
 
@@ -120,7 +120,7 @@ dkms status synosnap || true
 
 - 服务可以重新启动。
 - 下一次备份成功。
-- 恢复 hash 仍一致。
+- 恢复文件校验和仍一致。
 
 ## 内核升级
 
@@ -141,7 +141,7 @@ lsmod | grep synosnap
 通过标准：
 
 - DKMS 为新内核重建。
-- 备份和恢复 hash 测试仍通过。
+- 备份和恢复校验和测试仍通过。
 
 ## 卸载
 

@@ -2,10 +2,10 @@
 
 [English](rpm.md) | [中文](rpm.zh-CN.md)
 
-RPM support is experimental and must be validated in a disposable RPM-based VM
-or spare ARM64 host. The script uses Synology's official x86_64 rpm zip as a
-local input, extracts the official rpm payloads, and builds an aarch64 wrapper
-rpm for local testing.
+RPM support is in beta and should be validated in a disposable RPM-based VM or
+spare ARM64 host before use on an important system. The script uses Synology's
+official x86_64 rpm zip as a local input, extracts the official rpm payloads,
+and builds an aarch64 wrapper rpm for local testing.
 
 ## Build Prerequisites
 
@@ -196,5 +196,4 @@ successful snapshots for `/boot` and `/`, successful upload of `/boot/efi`,
 The run also produced two post-completion log lines similar to
 `Failed to transition snpashot`. The server-side task result and client status
 still reported completion, and `synosnap` snapshot device use count returned
-to zero. Treat this as a finding to keep under observation rather than proof of
-production readiness.
+to zero. Treat this as a finding to keep under observation during beta testing.

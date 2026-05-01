@@ -10,7 +10,7 @@
 - ARM64 原生 `synosnap` DKMS 内核模块
 - Box64 x86_64 用户态模拟器
 - 从官方包中本地提取的 Synology ABB x86_64 用户态文件
-- 社区维护的 wrapper 脚本和 systemd unit
+- 社区维护的封装脚本和 systemd unit
 - 社区维护的挂载点枚举兼容 shim
 
 ## 数据路径
@@ -24,11 +24,11 @@ ABB x86_64 userspace
   -> /dev/synosnap*
 ```
 
-PoC 的关键结果是：Box64 下的 x86_64 ABB 用户态发出的私有 snapshot ioctl 可以抵达 ARM64 原生 `synosnap` 内核模块。
+关键验证结果是：Box64 下的 x86_64 ABB 用户态发出的私有 snapshot ioctl 可以抵达 ARM64 原生 `synosnap` 内核模块。
 
 ## 为什么使用 Box64
 
-PoC 发现 Box64 在该工作负载上明显优于 QEMU。Box64 可以运行 ABB 工具，并打通 `sbdctl` 和 ABB daemon 所需的私有 ioctl 路径。
+验证结果显示，Box64 在该工作负载上明显优于 QEMU。Box64 可以运行 ABB 工具，并打通 `sbdctl` 和 ABB daemon 所需的私有 ioctl 路径。
 
 QEMU 不是本项目的主路线。
 
@@ -42,6 +42,6 @@ QEMU 不是本项目的主路线。
 /usr/local/lib/abb-agent-arm64-box64/mount_shim.so
 ```
 
-wrapper 会在该文件存在时用 `BOX64_LD_PRELOAD` 加载它。它只实现 PoC 中 ABB 挂载枚举用到的 libmount 符号子集。
+封装脚本会在该文件存在时用 `BOX64_LD_PRELOAD` 加载它。它只实现 ABB 挂载枚举在验证中用到的 libmount 符号子集。
 
-这是兼容性 workaround，不是通用 libmount 替代品。
+这是兼容性变通方案，不是通用 libmount 替代品。

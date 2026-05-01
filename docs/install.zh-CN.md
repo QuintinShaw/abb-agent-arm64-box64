@@ -2,6 +2,15 @@
 
 [English](install.md) | 中文
 
+首次试用时，最快路径是快速安装脚本：
+
+```bash
+./scripts/quickstart.sh --yes
+sudo abb-cli -c
+```
+
+参数和 RPM 注意事项见 [quickstart.zh-CN.md](quickstart.zh-CN.md)。
+
 先构建本地 deb：
 
 ```bash
@@ -45,4 +54,4 @@ sudo abb-cli -c
 sudo abb-cli -s
 ```
 
-初次验证时不要接受 Entire Device 备份任务。只使用小型测试范围，并先完成恢复/hash 校验。
+初次验证时不要接受 Entire Device 备份任务。只使用小型测试范围，并先完成恢复和校验和比对。

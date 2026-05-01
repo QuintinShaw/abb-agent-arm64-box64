@@ -32,4 +32,5 @@ sudo rmdir /mnt/abb-loop-test
 ```
 
 Depending on ABB/NAS behavior, loop devices may not appear as custom volumes.
-The PoC used a temporary SCSI debug disk when loop devices were not sufficient.
+Validation used a temporary SCSI debug disk when loop devices were not
+sufficient.
