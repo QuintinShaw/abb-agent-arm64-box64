@@ -5,8 +5,10 @@
 For a first trial on a compatible ARM64 Linux system, use the quickstart script:
 
 ```bash
-git clone https://github.com/QuintinShaw/abb-agent-arm64-box64.git
-cd abb-agent-arm64-box64
+curl -L -o abb-agent-arm64-box64-source.tar.gz \
+  https://github.com/QuintinShaw/abb-agent-arm64-box64/releases/latest/download/abb-agent-arm64-box64-source.tar.gz
+tar -xzf abb-agent-arm64-box64-source.tar.gz
+cd abb-agent-arm64-box64-*
 ./scripts/quickstart.sh --yes
 ```
 
@@ -37,6 +39,10 @@ The script:
 
 The generated package contains Synology proprietary files extracted locally
 from the official package. Do not upload it or attach it to GitHub Releases.
+
+The release source archive contains only repository source files, docs, scripts,
+and packaging metadata. It does not contain generated packages or Synology
+official binaries.
 
 ## Manual Official Archive
 

@@ -32,8 +32,10 @@ restore tests. See [docs/production-test-plan.md](docs/production-test-plan.md).
 For the lowest-friction trial on a compatible ARM64 Linux system:
 
 ```bash
-git clone https://github.com/QuintinShaw/abb-agent-arm64-box64.git
-cd abb-agent-arm64-box64
+curl -L -o abb-agent-arm64-box64-source.tar.gz \
+  https://github.com/QuintinShaw/abb-agent-arm64-box64/releases/latest/download/abb-agent-arm64-box64-source.tar.gz
+tar -xzf abb-agent-arm64-box64-source.tar.gz
+cd abb-agent-arm64-box64-*
 ./scripts/quickstart.sh --yes
 sudo abb-cli -c
 ```
@@ -74,8 +76,10 @@ Manual DEB path:
 ```bash
 sudo apt update
 sudo apt install -y git dkms build-essential "linux-headers-$(uname -r)" kmod systemd unzip wget dpkg-dev gcc-x86-64-linux-gnu
-git clone https://github.com/QuintinShaw/abb-agent-arm64-box64.git
-cd abb-agent-arm64-box64
+curl -L -o abb-agent-arm64-box64-source.tar.gz \
+  https://github.com/QuintinShaw/abb-agent-arm64-box64/releases/latest/download/abb-agent-arm64-box64-source.tar.gz
+tar -xzf abb-agent-arm64-box64-source.tar.gz
+cd abb-agent-arm64-box64-*
 sudo ./scripts/install-box64.sh
 ./scripts/build-deb.sh
 sudo dpkg -i dist/abb-agent-arm64-box64_3.2.0-5053_arm64.deb
@@ -160,9 +164,10 @@ Helpful links:
 
 ## Release Policy
 
-Source-only releases are allowed. Do not attach generated `.deb` / `.rpm`
-files, official Synology zip/deb/rpm files, extracted Synology files, NAS logs,
-or credentials to GitHub Releases.
+Source-only releases are allowed. The release download is a source archive made
+from tracked repository files. Do not attach generated `.deb` / `.rpm` files,
+official Synology zip/deb/rpm files, extracted Synology files, NAS logs, or
+credentials to GitHub Releases.
 
 ## Verify
 

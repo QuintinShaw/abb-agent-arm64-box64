@@ -5,8 +5,10 @@
 在兼容的 ARM64 Linux 系统上首次试用时，可以直接运行快速安装脚本：
 
 ```bash
-git clone https://github.com/QuintinShaw/abb-agent-arm64-box64.git
-cd abb-agent-arm64-box64
+curl -L -o abb-agent-arm64-box64-source.tar.gz \
+  https://github.com/QuintinShaw/abb-agent-arm64-box64/releases/latest/download/abb-agent-arm64-box64-source.tar.gz
+tar -xzf abb-agent-arm64-box64-source.tar.gz
+cd abb-agent-arm64-box64-*
 ./scripts/quickstart.sh --yes
 ```
 
@@ -35,6 +37,8 @@ sudo abb-cli -c
 - 运行只读预检脚本。
 
 生成的软件包包含从官方包本地提取的 Synology 专有文件。不要上传该软件包，也不要把它附加到 GitHub Releases。
+
+Release 源码包只包含仓库源码、文档、脚本和打包元数据，不包含生成的软件包，也不包含 Synology 官方二进制文件。
 
 ## 手动指定官方压缩包
 
